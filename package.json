@@ -1,0 +1,31 @@
+{
+  "name": "wantworthy.js",
+  "description": "build tool to assemble client side javascript projects",
+  "version": "0.0.1",
+  "author": "Ryan Fitzgerald <ryan@codebrewstudios.com>",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Wantworthy/wantworthy.js.git"
+  },
+  "licenses": [
+    {
+      "type": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+   ],
+  "keywords": ["wantworthy", "api", "client", "web"],
+  "dependencies": {
+    "superagent": "0.4.x"
+  },
+  "devDependencies": {
+    "mocha" : "0.14.x",
+    "should": "0.6.x",
+    "assembly" : "~0.2.20"
+  },
+  "bin": { "assembly": "./bin/assembly" },
+  "scripts": {
+    "test"  : "make test"
+  },
+  "engines": { "node": ">= 0.6.0" },
+  "main": "./lib/assembly"
+}
