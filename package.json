@@ -20,12 +20,12 @@
   "devDependencies": {
     "mocha" : "0.14.x",
     "should": "0.6.x",
-    "assembly" : "~0.2.20"
+    "assembly" : "~0.2.20",
+    "nock" : "0.11.x"
   },
-  "bin": { "assembly": "./bin/assembly" },
   "scripts": {
     "test"  : "make test"
   },
   "engines": { "node": ">= 0.6.0" },
-  "main": "./lib/assembly"
+  "main": "./lib/wantworthy"
 }
