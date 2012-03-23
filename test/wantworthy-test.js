@@ -1,48 +1,18 @@
-var Wantworthy = require("../lib/wantworthy").Wantworthy,
+var Wantworthy = require("../lib/wantworthy"),
     helper = require("./test-helper"),
     should = require('should');
 
 describe("Wantworthy.js", function() {
-  var wantworthy;
 
-  beforeEach(function(){
-    wantworthy = new Wantworthy({url : helper.API_URL});
-  });
-
-  it("should make discover request on init", function(done) {
-    wantworthy.api.discover = function(){
-      done();
+  it("should create and initialize a new client", function(done) {
+    Wantworthy.Client.prototype.init = function(callback){
+      callback(null);
     };
 
-    wantworthy.init();
-  });  
-
-  it("should set started to true on successful discover call", function(done) {
-    wantworthy.api.discover = function(callback){
-      callback();
-    };
-
-    wantworthy.started.should.be.false;
-
-    wantworthy.init(function() {
-      wantworthy.started.should.be.true;
+    Wantworthy.createClient({url : helper.API_URL}, function(err, client){
+      client.api.url.should.equal(helper.API_URL);
       done();
     });
-  });
-
-  it("should not set started to true when discover call returns error", function(done) {
-    wantworthy.api.discover = function(callback){
-      callback(new Error("fail"));
-    };
-
-    wantworthy.started.should.be.false;
-
-    wantworthy.init(function(err) {
-      err.message.should.equal('fail');
-      wantworthy.started.should.be.false;
-      done();
-    });
-
   });
 
 });
