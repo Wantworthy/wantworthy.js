@@ -12,7 +12,6 @@ test-unit:
 	@./node_modules/.bin/mocha \
 		--ui bdd \
 		--reporter $(REPORTER) \
-		--globals i,e \
 		$(TESTFILES)
 
 test-spec:
@@ -20,7 +19,6 @@ test-spec:
 		--ui bdd \
 		--reporter $(REPORTER) \
 		--grep "$(grep)" \
-		--globals i,e \
 		$(TESTFILES)
 
 clean:

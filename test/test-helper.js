@@ -1,5 +1,5 @@
 
-var API_URL = exports.API_URL = "https://127.0.0.1:9000";
+var API_URL = exports.API_URL = "http://api.dev.wantworthy.com:9000";
 
 exports.nock = require('nock');
 
@@ -18,8 +18,31 @@ exports.mockDescription = {
     "1.0":{
       "session":{
         "description":"A gateway for accessing privileged resources",
-        "mediaType":"application/vnd.spire-io.session+json;version=1.0"
+        "mediaType":"application/vnd.wantworthy.session+json;version=1.0"
+      },
+      "account":{
+        "description":"A account for use with the api",
+        "mediaType":"application/vnd.wantworthy.account+json;version=1.0"
       }
     }
   }
+};
+
+exports.testUser = {
+  email: "test@test.com",
+  password: "test123"
+}
+
+exports.session = {
+  token: 'cR5xrr80EmkJ1okQSXCGNJJ31Iw=',
+  resources: {
+    account: { 
+      id: 60391,
+      email: 'test@test.com',
+      secret: 'y4bp6TeR2XJw6Shx2mnD',
+      nickname: 'tester',
+      first_name: "Tim",
+      last_name: "Tester" 
+    } 
+  } 
 }
