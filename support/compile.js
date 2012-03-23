@@ -1,3 +1,5 @@
+// Mocha & Chai Browser Require
+
 var fs = require('fs')
   , join = require('path').join;
 

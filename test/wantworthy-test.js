@@ -1,4 +1,4 @@
-var Wantworthy = require("../lib/wantworthy").Wantworthy,
+var Wantworthy = require("../lib/wantworthy"),
     helper = require("./test-helper"),
     should = require('should');
 

@@ -1,7 +1,7 @@
 !function (name, definition) {
   if (typeof define == 'function' && typeof define.amd  == 'object') define(definition);
   else this[name] = definition();
-}('wantworthy', function () {
+}('Wantworthy', function () {
 
 // CommonJS require()
 
@@ -995,7 +995,7 @@ var superagent = function(exports){
 require.register("wantworthy.js", function(module, exports, require){
 var API = require("./wantworthy/api").API;
 
-var Wantworthy = exports.Wantworthy = function (options) {
+var Wantworthy = module.exports = function (options) {
   options = options || {};
   this.api = new API(options);
   this.started = false; // flag to know if api service has been discovered
