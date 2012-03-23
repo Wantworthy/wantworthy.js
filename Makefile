@@ -12,7 +12,6 @@ test-unit:
 	@./node_modules/.bin/mocha \
 		--ui bdd \
 		--reporter $(REPORTER) \
-		--require should \
 		--globals i,e \
 		$(TESTFILES)
 
@@ -20,7 +19,6 @@ test-spec:
 	@./node_modules/.bin/mocha \
 		--ui bdd \
 		--reporter $(REPORTER) \
-		--require should \
 		--grep "$(grep)" \
 		--globals i,e \
 		$(TESTFILES)

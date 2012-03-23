@@ -1,6 +1,7 @@
 var Wantworthy = require("../lib/wantworthy"),
     helper = require("./test-helper"),
-    should = require('should');
+    chai = require('chai'),
+    should = chai.should();
 
 describe("Wantworthy.js", function() {
   var wantworthy;

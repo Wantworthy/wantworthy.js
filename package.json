@@ -19,8 +19,7 @@
   },
   "devDependencies": {
     "mocha" : "0.14.x",
-    "should": "0.6.x",
-    "assembly" : "~0.2.20",
+    "chai" : "0.5.x",
     "nock" : "0.11.x"
   },
   "scripts": {
