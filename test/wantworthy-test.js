@@ -1,5 +1,5 @@
 var Wantworthy = require("../lib/wantworthy"),
-    helper = require("./test-helper"),
+    helper = require("./test-helper").TestHelper,
     chai = require('chai'),
     should = chai.should();
 

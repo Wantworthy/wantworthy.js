@@ -1,6 +1,6 @@
 var API = require("../lib/wantworthy/api").API;
-    helper = require("./test-helper"),
-    nock = helper.nock,
+    helper = require("./test-helper").TestHelper,
+    nock = require('nock'),
     chai = require('chai'),
     should = chai.should();
 

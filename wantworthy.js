@@ -58,6 +58,7 @@ var API = exports.API = function(options) {
 
   this.url = options.url || 'https://api.wantworthy.com';
   this.version = options.version || '1.0';
+  this.types = {};
 };
 
 API.prototype.discover = function(callback) {
@@ -68,11 +69,43 @@ API.prototype.discover = function(callback) {
   this.discoverRequest(function (err, description) {
     if(err) return callback(err);
 
-    self.description = description;
-    self.schema = description.schema[self.version];
+    self.setDescription(description);
 
     callback(null, description);
   });
+};
+
+API.prototype.setDescription = function(description) {
+  var self = this;
+
+  this.description = description;
+  this.schema = description.schema[this.version];
+
+  Object.keys(this.schema).forEach(function(resource){
+    var mediaType = self.schema[resource].mediaType;
+    
+    self.types[resource] = mediaType;
+    request.serialize[mediaType] = JSON.stringify;
+  });
+}
+
+API.prototype.login = function(auth, callback) {
+  request
+    .post(this.description.resources.sessions.url)
+    .type(this.mediaType('account'))
+    .set('Accept', this.mediaType('session'))
+    .send(auth)
+    .end(parseResponse(callback));
+};
+
+function parseResponse(callback) {
+  return function parser(res) {
+    try{
+      return callback(null, JSON.parse(res.text));
+    } catch(err){
+      return callback(err);
+    }
+  }
 };
 
 API.prototype.discoverRequest = function(callback) {
@@ -86,6 +119,18 @@ API.prototype.discoverRequest = function(callback) {
 
       return callback(null, res.body);
     });
+};
+
+API.prototype.mediaType = function (resourceName) {
+  if (!this.schema) {
+    throw "No description object.  Run `spire.api.discover` first.";
+  }
+
+  if (!this.schema[resourceName]) {
+    throw "No schema for resource " + resourceName;
+  }
+
+  return this.schema[resourceName].mediaType;
 };
 }); // module: wantworthy/api.js
 
@@ -661,7 +706,7 @@ var superagent = function(exports){
     this.method = method;
     this.url = url;
     this.header = {};
-    this.set('X-Requested-With', 'XMLHttpRequest');
+    // this.set('X-Requested-With', 'XMLHttpRequest');
     this.on('end', function(){
       self.callback(new Response(self.xhr));
     });

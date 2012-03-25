@@ -21,6 +21,9 @@ test-spec:
 		--grep "$(grep)" \
 		$(TESTFILES)
 
+test-server:
+	@node test/browser/server
+
 clean:
 	rm -rf ./examples/build
 
