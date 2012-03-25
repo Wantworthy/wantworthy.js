@@ -38,19 +38,36 @@ if(!Wantworthy) {
 
   TestHelper.urlFor = function(resourceName) {
     if(resourceName === 'description') return description.url;
-    
+
     var resource = description.resources[resourceName];
     if(!resource) {
-      console.warn('route doesnt exist: ' + name);
+      console.warn('route doesnt exist: ' + resourceName);
       return null;
     } else{
       return resource.url;
     }
   };
 
-  TestHelper.testUser = {
+  TestHelper.mediaType = function(resourceName) {
+    var schema = description.schema['1.0'][resourceName];
+    if(!schema) {
+      console.warn('resource doesnt exist: ' + resourceName);
+      return null;
+    } else{
+      return schema.mediaType;
+    }
+  };
+
+  TestHelper.credentials = {
     email: "test@test.com",
     password: "test123"
+  };
+
+  TestHelper.testUser = {
+    email: "test@test.com",
+    password: "test123",
+    first_name: "Time",
+    last_name: "Tester"
   };
 
   TestHelper.session = {

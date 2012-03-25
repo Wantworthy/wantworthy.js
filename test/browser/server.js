@@ -4,8 +4,8 @@ var helper = require("../test-helper").TestHelper,
     express = require('express'),
     app = express.createServer();
 
-app.use(express.bodyParser());
 app.use(cors);
+app.use(express.bodyParser());
 
 app.get('/', function(req, res){
   res.send(helper.mockDescription);
@@ -16,13 +16,18 @@ app.get("/wantworthy.js", function(req, res) {
   fs.createReadStream(path.join(__dirname, "../../wantworthy.js")).pipe(res);
 });
 
-function cors(req, res, next){
+app.post('/sessions', function(req, res) {
+  res.send(helper.session, {'Content-Type' : helper.mediaType("session") }, 201);
+});
+
+function cors(req, res, next) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
-  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'content-type, Accept, X-Requested-With');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Max-Age', '*');
+
   if(req.method === 'OPTIONS') {
-    res.send("", 200);
+    res.send(200);
   } else {
     next();
   }

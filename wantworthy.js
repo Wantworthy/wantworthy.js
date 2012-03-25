@@ -706,7 +706,7 @@ var superagent = function(exports){
     this.method = method;
     this.url = url;
     this.header = {};
-    // this.set('X-Requested-With', 'XMLHttpRequest');
+    this.set('X-Requested-With', 'XMLHttpRequest');
     this.on('end', function(){
       self.callback(new Response(self.xhr));
     });

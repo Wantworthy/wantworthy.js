@@ -41,7 +41,7 @@ describe("API", function() {
     });
 
     it("should return session for valid email/pass", function(done){
-      var creds = {email : "test@test.com", password : "test123"};
+      var creds = helper.credentials;
 
       apiServer.post("/sessions", creds).reply(201, helper.session, {'content-type': api.mediaType("session") });
 

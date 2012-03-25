@@ -17,6 +17,21 @@ describe("Api Browser Test", function() {
       });
 
     });
+  });
+
+  describe("Login", function() {
+    beforeEach(function() {
+      wantworthy.api.setDescription(TestHelper.mockDescription);
+    });
+
+    it("should return session for valid email/pass", function(done){
+      var creds = TestHelper.credentials;
+
+      wantworthy.api.login(creds, function(err, session){
+        session.should.eql(TestHelper.session);
+        done();
+      });
+    });
 
   });
 })
