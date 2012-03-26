@@ -84,4 +84,12 @@ if(!Wantworthy) {
     } 
   };
 
+  TestHelper.validRegisterParams = function(){
+    return {
+      email : "test9123@test.com",
+      password : "test123",
+      nickname : "test912"
+    };
+  };
+
 })(typeof process !== "undefined" && process.title ? module.exports : window);

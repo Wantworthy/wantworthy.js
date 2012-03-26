@@ -50,6 +50,23 @@ describe("API", function() {
         done();
       });
     });
+  });
+
+  describe("Create Account", function() {
+    beforeEach(function() {
+      api.setDescription(helper.mockDescription);
+    });
+
+    it("should return new session and account", function(done){
+      var regParams = helper.validRegisterParams();
+
+      apiServer.post("/accounts", regParams).reply(201, helper.session, {'content-type': api.mediaType("session") });
+
+      api.createAccount(regParams, function(err, session){
+        session.should.eql(helper.session);
+        done();
+      });
+    });
 
   });
 });

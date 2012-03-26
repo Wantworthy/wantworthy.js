@@ -87,7 +87,7 @@ API.prototype.setDescription = function(description) {
     self.types[resource] = mediaType;
     request.serialize[mediaType] = JSON.stringify;
   });
-}
+};
 
 API.prototype.login = function(auth, callback) {
   request
@@ -98,9 +98,18 @@ API.prototype.login = function(auth, callback) {
     .end(parseResponse(callback));
 };
 
+API.prototype.createAccount = function(accountParams, callback) {
+  request
+    .post(this.urlFor('accounts'))
+    .type(this.mediaType('account'))
+    .set('Accept', this.mediaType('session'))
+    .send(accountParams)
+    .end(parseResponse(callback));
+};
+
 function parseResponse(callback) {
   return function parser(res) {
-    try{
+    try {
       return callback(null, JSON.parse(res.text));
     } catch(err){
       return callback(err);
@@ -123,7 +132,7 @@ API.prototype.discoverRequest = function(callback) {
 
 API.prototype.mediaType = function (resourceName) {
   if (!this.schema) {
-    throw "No description object.  Run `spire.api.discover` first.";
+    throw "No description object.  Run `wantworthy.api.discover` first.";
   }
 
   if (!this.schema[resourceName]) {
@@ -131,6 +140,18 @@ API.prototype.mediaType = function (resourceName) {
   }
 
   return this.schema[resourceName].mediaType;
+};
+
+API.prototype.urlFor = function (resourceName) {
+  if (!this.description) {
+    throw "No description object.  Run `wantworthy.api.discover` first.";
+  }
+
+  if (!this.description.resources[resourceName]) {
+    throw "No schema for resource " + resourceName;
+  }
+
+  return this.description.resources[resourceName].url;
 };
 }); // module: wantworthy/api.js
 
