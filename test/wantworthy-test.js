@@ -10,40 +10,52 @@ describe("Wantworthy.js", function() {
     wantworthy = new Wantworthy({url : helper.API_URL});
   });
 
-  it("should make discover request on init", function(done) {
-    wantworthy.api.discover = function(){
-      done();
-    };
+  describe('start', function(){
+    it("should make discover request", function(done) {
+      wantworthy.api.discover = function(){
+        done();
+      };
 
-    wantworthy.init();
-  });  
-
-  it("should set started to true on successful discover call", function(done) {
-    wantworthy.api.discover = function(callback){
-      callback();
-    };
-
-    wantworthy.started.should.be.false;
-
-    wantworthy.init(function() {
-      wantworthy.started.should.be.true;
-      done();
-    });
-  });
-
-  it("should not set started to true when discover call returns error", function(done) {
-    wantworthy.api.discover = function(callback){
-      callback(new Error("fail"));
-    };
-
-    wantworthy.started.should.be.false;
-
-    wantworthy.init(function(err) {
-      err.message.should.equal('fail');
-      wantworthy.started.should.be.false;
-      done();
+      wantworthy.start();
     });
 
-  });
+    it("should NOT make get session request", function(done) {
+      wantworthy.api.discover = function(cb) {
+        cb();
+      };
 
+      wantworthy.api.getSession = function(token, cb){
+        throw new Error("Get Session Called");
+      };
+
+      wantworthy.start(done);
+    });
+
+    it("should make get session request", function(done) {
+      var mockSession = {token : "123456", account : {email :"test@test.com"}};
+
+      wantworthy.api.discover = function(cb){
+        cb();
+      };
+
+      wantworthy.api.getSession = function(token, cb){
+        token.should.equal(mockSession.token);
+        cb();
+      };
+
+      wantworthy.start(mockSession.token, done);
+    });
+
+    it("should return error", function(done) {
+      wantworthy.api.discover = function(callback){
+        callback(new Error("fail"));
+      };
+
+      wantworthy.start(function(err) {
+        err.message.should.equal('fail');
+        done();
+      });
+
+    });
+  });
 });
