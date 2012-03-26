@@ -91,7 +91,7 @@ API.prototype.setDescription = function(description) {
 
 API.prototype.login = function(auth, callback) {
   request
-    .post(this.description.resources.sessions.url)
+    .post(this.urlFor('sessions'))
     .type(this.mediaType('account'))
     .set('Accept', this.mediaType('session'))
     .send(auth)
@@ -104,6 +104,13 @@ API.prototype.createAccount = function(accountParams, callback) {
     .type(this.mediaType('account'))
     .set('Accept', this.mediaType('session'))
     .send(accountParams)
+    .end(parseResponse(callback));
+};
+
+API.prototype.getSession = function(token, callback) {
+  request
+    .get(this.urlFor('sessions') + '/' + token)
+    .set('Accept', this.mediaType('session'))
     .end(parseResponse(callback));
 };
 
@@ -1067,13 +1074,39 @@ var Wantworthy = module.exports = function (options) {
   this.started = false; // flag to know if api service has been discovered
 };
 
-Wantworthy.prototype.init = function(callback) {
+//
+// ### function start (sessionToken, done)
+// #### @sessionToken {string} optional session token, if previous session exists.
+// #### @callback {function} Continuation to respond to when the client has been started, 
+// Initializes the wantworthy client with api description and optionally an existing session
+//
+Wantworthy.prototype.start = function(sessionToken, callback) {
+  if (!callback && typeof sessionToken === 'function') {
+      callback = sessionToken;
+      sessionToken = null;
+  }
+
   var self = this;
+
   this.api.discover(function(err, description){
     if(err) return callback(err);
 
-    self.started = true;
-    callback(null);
+    if(sessionToken) {
+      self.setSession(sessionToken, callback);
+    } else {
+      return callback(null);
+    }
+  });
+};
+
+Wantworthy.prototype.setSession = function(token, callback) {
+  var self = this;
+
+  self.api.getSession(token, function(err, session){
+    if(err) return callback(err);
+    self.session = session;
+
+    return callback(null, session);
   });
 };
 }); // module: wantworthy.js
