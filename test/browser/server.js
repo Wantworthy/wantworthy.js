@@ -20,6 +20,10 @@ app.post('/sessions', function(req, res) {
   res.send(helper.session, {'Content-Type' : helper.mediaType("session") }, 201);
 });
 
+app.post('/accounts', function(req, res) {
+  res.send(helper.session, {'Content-Type' : helper.mediaType("session") }, 201);
+});
+
 app.get('/sessions/:token', function(req, res) {
   if(helper.session.token === req.params.token){
     res.send(helper.session, {'Content-Type' : helper.mediaType("session") }, 200);

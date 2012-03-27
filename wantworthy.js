@@ -1092,14 +1092,36 @@ Wantworthy.prototype.start = function(sessionToken, callback) {
     if(err) return callback(err);
 
     if(sessionToken) {
-      self.setSession(sessionToken, callback);
+      self.loadSession(sessionToken, callback);
     } else {
       return callback(null);
     }
   });
 };
 
-Wantworthy.prototype.setSession = function(token, callback) {
+Wantworthy.prototype.register = function(accountParams, callback) {
+  var self = this;
+
+  self.api.createAccount(accountParams, function(err, session){
+    if(err) return callback(err);
+
+    self.session = session;
+    return callback(null, session);
+  });
+};
+
+Wantworthy.prototype.login = function(credentials, callback) {
+  var self = this;
+
+  self.api.login(credentials, function(err, session){
+    if(err) return callback(err);
+
+    self.session = session;
+    return callback(null, session);
+  });
+};
+
+Wantworthy.prototype.loadSession = function(token, callback) {
   var self = this;
 
   self.api.getSession(token, function(err, session){

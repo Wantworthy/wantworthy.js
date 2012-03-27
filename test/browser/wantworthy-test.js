@@ -23,4 +23,38 @@ describe("Wantworthy.js", function() {
     });
 
   });
+
+  describe('Register', function(){
+    beforeEach(function(done){
+      wantworthy.start(done);
+    });
+
+    it("should create return session with new account", function(done) {
+      var regParams = TestHelper.validRegisterParams();
+
+      wantworthy.register(regParams, function(err, session){
+        session.should.eql(TestHelper.session);
+        wantworthy.session.should.eql(TestHelper.session);
+        done();
+      });
+      
+    });
+  });  
+
+  describe('Login', function(){
+    beforeEach(function(done){
+      wantworthy.start(done);
+    });
+
+    it("should create and set new session", function(done) {
+      var creds = TestHelper.credentials;
+
+      wantworthy.login(creds, function(err, session){
+        session.should.eql(TestHelper.session);
+        wantworthy.session.should.eql(TestHelper.session);
+        done();
+      });
+      
+    });
+  });
 })
