@@ -71,7 +71,7 @@ if(!Wantworthy) {
   };
 
   TestHelper.session = {
-    token: 'cR5xrr80EmkJ1okQSXCGNJJ31Iw=',
+    token: 'cR5xrr80EmkJ1okQSXCGNJJ31Iw',
     resources: {
       account: { 
         id: 60391,

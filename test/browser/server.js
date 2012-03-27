@@ -20,6 +20,14 @@ app.post('/sessions', function(req, res) {
   res.send(helper.session, {'Content-Type' : helper.mediaType("session") }, 201);
 });
 
+app.get('/sessions/:token', function(req, res) {
+  if(helper.session.token === req.params.token){
+    res.send(helper.session, {'Content-Type' : helper.mediaType("session") }, 200);
+  } else {
+    res.send(404);
+  }
+});
+
 function cors(req, res, next) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
   res.setHeader('Access-Control-Allow-Headers', 'content-type, Accept, X-Requested-With');

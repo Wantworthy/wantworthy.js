@@ -1,4 +1,4 @@
-describe("Api Browser Test", function() {
+describe("Api", function() {
   var should = chai.should(),
       wantworthy;
 
@@ -28,6 +28,22 @@ describe("Api Browser Test", function() {
       var creds = TestHelper.credentials;
 
       wantworthy.api.login(creds, function(err, session){
+        session.should.eql(TestHelper.session);
+        done();
+      });
+    });
+
+  });  
+
+  describe("Get Session", function() {
+    beforeEach(function() {
+      wantworthy.api.setDescription(TestHelper.mockDescription);
+    });
+
+    it("should return session", function(done){
+      var session = TestHelper.session;
+
+      wantworthy.api.getSession(session.token, function(err, session){
         session.should.eql(TestHelper.session);
         done();
       });
