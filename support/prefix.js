@@ -1,4 +1,4 @@
-!function (name, definition) {
-  if (typeof define == 'function' && typeof define.amd  == 'object') define(definition);
-  else this[name] = definition();
-}('Wantworthy', function () {
+!function (root, definition) {
+  if (typeof define == 'function' && typeof define.amd  == 'object') define('wantworthy', definition);
+  else root.Wantworthy = definition();
+}(this, function () {
