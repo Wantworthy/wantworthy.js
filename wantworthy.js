@@ -131,7 +131,7 @@ API.prototype.discoverRequest = function(callback) {
     .get(self.url + "/")
     .set('Accept', 'application/json')
     .end(function(res) {
-      if(!res.ok) return callback(new Error(res.text));
+      if(!res.ok) return callback(new Error(res.text || "Service Unavailable " + self.url));
 
       return callback(null, res.body);
     });
