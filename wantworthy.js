@@ -5,35 +5,35 @@
 
 // CommonJS require()
 
-function require(p){
-    var path = require.resolve(p)
-      , mod = require.modules[path];
+function requireSync(p){
+    var path = requireSync.resolve(p)
+      , mod = requireSync.modules[path];
     if (!mod) throw new Error('failed to require "' + p + '"');
     if (!mod.exports) {
       mod.exports = {};
-      mod.call(mod.exports, mod, mod.exports, require.relative(path));
+      mod.call(mod.exports, mod, mod.exports, requireSync.relative(path));
     }
     return mod.exports;
   }
 
-require.modules = {};
+requireSync.modules = {};
 
-require.resolve = function (path){
+requireSync.resolve = function (path){
     var orig = path
       , reg = path + '.js'
       , index = path + '/index.js';
-    return require.modules[reg] && reg
-      || require.modules[index] && index
+    return requireSync.modules[reg] && reg
+      || requireSync.modules[index] && index
       || orig;
   };
 
-require.register = function (path, fn){
-    require.modules[path] = fn;
+requireSync.register = function (path, fn){
+    requireSync.modules[path] = fn;
   };
 
-require.relative = function (parent) {
+requireSync.relative = function (parent) {
     return function(p){
-      if ('.' != p[0]) return require(p);
+      if ('.' != p[0]) return requireSync(p);
 
       var path = parent.split('/')
         , segs = p.split('/');
@@ -45,12 +45,12 @@ require.relative = function (parent) {
         else if ('.' != seg) path.push(seg);
       }
 
-      return require(path.join('/'));
+      return requireSync(path.join('/'));
     };
   };
 
 
-require.register("wantworthy/api.js", function(module, exports, require){
+requireSync.register("wantworthy/api.js", function(module, exports, require){
 var request = require('wantworthy/browser/superagent');
 
 var API = exports.API = function(options) {
@@ -162,7 +162,7 @@ API.prototype.urlFor = function (resourceName) {
 };
 }); // module: wantworthy/api.js
 
-require.register("wantworthy/browser/superagent.js", function(module, exports, require){
+requireSync.register("wantworthy/browser/superagent.js", function(module, exports, require){
 
 /**
  * Module exports.
@@ -1065,7 +1065,7 @@ var superagent = function(exports){
 
 }); // module: wantworthy/browser/superagent.js
 
-require.register("wantworthy.js", function(module, exports, require){
+requireSync.register("wantworthy.js", function(module, exports, require){
 var API = require("./wantworthy/api").API;
 
 var Wantworthy = module.exports = function (options) {
@@ -1134,5 +1134,5 @@ Wantworthy.prototype.loadSession = function(token, callback) {
 }); // module: wantworthy.js
 
 
-  return require('wantworthy');
+  return requireSync('wantworthy');
 });

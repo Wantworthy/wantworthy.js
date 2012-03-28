@@ -1,3 +1,3 @@
 
-  return require('wantworthy');
+  return requireSync('wantworthy');
 });

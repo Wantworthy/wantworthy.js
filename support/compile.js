@@ -51,15 +51,15 @@ function compile() {
   var buf = '';
   buf += '\n// CommonJS require()\n\n';
   buf += browser.require + '\n\n';
-  buf += 'require.modules = {};\n\n';
-  buf += 'require.resolve = ' + browser.resolve + ';\n\n';
-  buf += 'require.register = ' + browser.register + ';\n\n';
-  buf += 'require.relative = ' + browser.relative + ';\n\n';
+  buf += 'requireSync.modules = {};\n\n';
+  buf += 'requireSync.resolve = ' + browser.resolve + ';\n\n';
+  buf += 'requireSync.register = ' + browser.register + ';\n\n';
+  buf += 'requireSync.relative = ' + browser.relative + ';\n\n';
 
   args.forEach(function(file){
     var js = files[file];
     file = file.replace('lib/', '');
-    buf += '\nrequire.register("' + file + '", function(module, exports, require){\n';
+    buf += '\nrequireSync.register("' + file + '", function(module, exports, require){\n';
     buf += js;
     buf += '\n}); // module: ' + file + '\n';
   });
@@ -87,13 +87,13 @@ var browser = {
    * Require a module.
    */
 
-  require: function require(p){
-    var path = require.resolve(p)
-      , mod = require.modules[path];
+  require: function requireSync(p){
+    var path = requireSync.resolve(p)
+      , mod = requireSync.modules[path];
     if (!mod) throw new Error('failed to require "' + p + '"');
     if (!mod.exports) {
       mod.exports = {};
-      mod.call(mod.exports, mod, mod.exports, require.relative(path));
+      mod.call(mod.exports, mod, mod.exports, requireSync.relative(path));
     }
     return mod.exports;
   },
@@ -106,8 +106,8 @@ var browser = {
     var orig = path
       , reg = path + '.js'
       , index = path + '/index.js';
-    return require.modules[reg] && reg
-      || require.modules[index] && index
+    return requireSync.modules[reg] && reg
+      || requireSync.modules[index] && index
       || orig;
   },
 
@@ -117,7 +117,7 @@ var browser = {
 
   relative: function(parent) {
     return function(p){
-      if ('.' != p[0]) return require(p);
+      if ('.' != p[0]) return requireSync(p);
 
       var path = parent.split('/')
         , segs = p.split('/');
@@ -129,7 +129,7 @@ var browser = {
         else if ('.' != seg) path.push(seg);
       }
 
-      return require(path.join('/'));
+      return requireSync(path.join('/'));
     };
   },
 
@@ -138,6 +138,6 @@ var browser = {
    */
 
   register: function(path, fn){
-    require.modules[path] = fn;
+    requireSync.modules[path] = fn;
   }
 };
