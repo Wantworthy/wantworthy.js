@@ -68,6 +68,18 @@ describe("API", function() {
       });
     });
 
+    it("should return error", function(done){
+      var regParams = helper.validRegisterParams();
+      var errResp = {"email":["Email address is already registered."]};
+
+      apiServer.post("/accounts", regParams).reply(400, errResp, {'content-type': api.mediaType("session") });
+
+      api.createAccount(regParams, function(err, session){
+        err.should.eql(errResp);
+        done();
+      });
+    });
+
   });
 
   describe("Get Session", function() {
