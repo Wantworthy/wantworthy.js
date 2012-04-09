@@ -84,6 +84,35 @@ if(!Wantworthy) {
     } 
   };
 
+  TestHelper.adminSession = {
+    token: 'cR5xrr80EmkJ1okQSXCGNJJ31Iw',
+    resources: {
+      account: { 
+        id: 60391,
+        email: 'root@wantworthy.com',
+        secret: 'y4bp6TeR2XJw6Shx2mnD',
+        nickname: 'adminer',
+        first_name: "Ad",
+        last_name: "Min" 
+      } 
+    } 
+  };
+
+  TestHelper.adminRoleSession = {
+    token: 'cR5xrr80EmkJ1okQSXCGNJJ31Iw',
+    resources: {
+      account: { 
+        id: 87654,
+        email: 'bob@bob.com',
+        secret: 'y4bp6TeR2XJw6Shx2mnD',
+        nickname: 'adminer',
+        first_name: "Bob",
+        last_name: "Bobber",
+        roles : ['admin']
+      } 
+    } 
+  };
+
   TestHelper.validRegisterParams = function(){
     return {
       email : "test9123@test.com",

@@ -1069,8 +1069,30 @@ var superagent = function(exports){
 
 }); // module: wantworthy/browser/superagent.js
 
+requireSync.register("wantworthy/resources/session.js", function(module, exports, require){
+var Session = exports.Session = function(sessionData){
+  this.name = 'session';
+  this.data = sessionData;
+  this.token = sessionData.token;
+
+  this.resources = this.data.resources;
+  this.account = this.resources.account;
+};
+
+Session.prototype.isAdmin = function() {
+  if(this.account && this.account.roles){
+    return Boolean(~this.account.roles.indexOf("admin"))
+  } else if(this.account) {
+    return new RegExp(/@wantworthy.com/).test(this.account.email);
+  } else {
+    return false;
+  }
+};
+}); // module: wantworthy/resources/session.js
+
 requireSync.register("wantworthy.js", function(module, exports, require){
-var API = require("./wantworthy/api").API;
+var API = require("./wantworthy/api").API,
+    Session = require('./wantworthy/resources/session').Session;
 
 var Wantworthy = module.exports = function (options) {
   options = options || {};
@@ -1106,33 +1128,33 @@ Wantworthy.prototype.start = function(sessionToken, callback) {
 Wantworthy.prototype.register = function(accountParams, callback) {
   var self = this;
 
-  self.api.createAccount(accountParams, function(err, session){
+  self.api.createAccount(accountParams, function(err, sessionData){
     if(err) return callback(err);
 
-    self.session = session;
-    return callback(null, session);
+    self.session = new Session(sessionData);
+    return callback(null, self.session);
   });
 };
 
 Wantworthy.prototype.login = function(credentials, callback) {
   var self = this;
 
-  self.api.login(credentials, function(err, session){
+  self.api.login(credentials, function(err, sessionData){
     if(err) return callback(err);
 
-    self.session = session;
-    return callback(null, session);
+    self.session = new Session(sessionData);
+    return callback(null, self.session);
   });
 };
 
 Wantworthy.prototype.loadSession = function(token, callback) {
   var self = this;
 
-  self.api.getSession(token, function(err, session){
+  self.api.getSession(token, function(err, sessionData){
     if(err) return callback(err);
-    self.session = session;
 
-    return callback(null, session);
+    self.session = new Session(sessionData);
+    return callback(null, self.session);
   });
 };
 }); // module: wantworthy.js

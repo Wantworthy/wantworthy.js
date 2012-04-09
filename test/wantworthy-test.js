@@ -32,18 +32,16 @@ describe("Wantworthy.js", function() {
     });
 
     it("should make get session request", function(done) {
-      var mockSession = {token : "123456", account : {email :"test@test.com"}};
-
       wantworthy.api.discover = function(cb){
         cb();
       };
 
       wantworthy.api.getSession = function(token, cb){
-        token.should.equal(mockSession.token);
-        cb();
+        token.should.equal(helper.session.token);
+        cb(null, helper.session);
       };
 
-      wantworthy.start(mockSession.token, done);
+      wantworthy.start(helper.session.token, done);
     });
 
     it("should return error", function(done) {

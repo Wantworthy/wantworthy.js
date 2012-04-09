@@ -17,7 +17,8 @@ describe("Wantworthy.js", function() {
 
     it("should load up session", function(done) {
       wantworthy.start(TestHelper.session.token, function(err) {
-        wantworthy.session.should.eql(TestHelper.session);
+        wantworthy.session.token.should.eql(TestHelper.session.token);
+        wantworthy.session.account.should.eql(TestHelper.session.resources.account);
         done();
       });
     });
@@ -33,8 +34,8 @@ describe("Wantworthy.js", function() {
       var regParams = TestHelper.validRegisterParams();
 
       wantworthy.register(regParams, function(err, session){
-        session.should.eql(TestHelper.session);
-        wantworthy.session.should.eql(TestHelper.session);
+        session.token.should.eql(TestHelper.session.token);
+        wantworthy.session.token.should.eql(TestHelper.session.token);
         done();
       });
       
@@ -50,8 +51,8 @@ describe("Wantworthy.js", function() {
       var creds = TestHelper.credentials;
 
       wantworthy.login(creds, function(err, session){
-        session.should.eql(TestHelper.session);
-        wantworthy.session.should.eql(TestHelper.session);
+        session.token.should.eql(TestHelper.session.token);
+        wantworthy.session.token.should.eql(TestHelper.session.token);
         done();
       });
       
