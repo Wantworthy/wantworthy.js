@@ -1,6 +1,6 @@
 {
   "name": "wantworthy.js",
-  "description": "build tool to assemble client side javascript projects",
+  "description": "Javascript client for working with the wantworthy.com api. Runs in node and the browser",
   "version": "0.0.1",
   "author": "Ryan Fitzgerald <ryan@codebrewstudios.com>",
   "repository": {
