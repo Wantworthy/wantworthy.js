@@ -33,7 +33,11 @@ app.get('/sessions/:token', function(req, res) {
 });
 
 app.post('/products', function(req, res) {
-  res.send(helper.nikeProduct, {'Content-Type' : helper.mediaType("product") }, 201);
+  if(helper.session.token != parseAuthToken(req) ) {
+    res.send("unauthorized", 401);
+  } else {
+    res.send(helper.nikeProduct, {'Content-Type' : helper.mediaType("product") }, 201);
+  }
 });
 
 function cors(req, res, next) {
@@ -47,6 +51,12 @@ function cors(req, res, next) {
   } else {
     next();
   }
+};
+
+function parseAuthToken(req) {
+  if(!req.headers.authorization) return null;
+
+  return req.headers.authorization.split(" ").pop();
 };
 
 app.use(express.static(path.join(__dirname, "../../")));

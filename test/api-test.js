@@ -5,10 +5,10 @@ var API = require("../lib/wantworthy/api").API;
     should = chai.should();
 
 describe("API", function() {
-  var api;
-  var apiServer = nock(helper.API_URL);
+  var api, apiServer;
 
   beforeEach(function(){
+    apiServer = nock(helper.API_URL);
     api = new API({url : helper.API_URL});
   });
 
@@ -114,6 +114,22 @@ describe("API", function() {
 
       api.createProduct(prodAttrs, token, function(err, product){
         product.should.eql(helper.nikeProduct);
+        done();
+      });
+    });
+
+    it("should return 401 unauthorized", function(done){
+      var invalidToken = "invalidTokenString",
+          prodAttrs = {name : "nike prod", url: "http://nike.com/p1"};
+
+      apiServer
+        .matchHeader('accept', api.mediaType("product"))
+        .matchHeader('Authorization', "token "+ invalidToken)
+        .post("/products", prodAttrs)
+        .reply(401, "unauthorized");
+
+      api.createProduct(prodAttrs, invalidToken, function(err, product){
+        err.message.should.equal("unauthorized");
         done();
       });
 

@@ -129,7 +129,9 @@ function parseResponse(callback) {
     try {
       if(res.ok) {
         return callback(null, JSON.parse(res.text));
-      } else{
+      } else if(res.unauthorized){
+        return callback(new Error(res.text));
+      }else {
         return callback(JSON.parse(res.text));
       }      
     } catch(err){

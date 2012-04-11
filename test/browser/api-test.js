@@ -66,5 +66,15 @@ describe("Api", function() {
       });
     });
 
+    it("should return 401 unauthorized", function(done){
+      var invalidToken = "invalidTokenString",
+          prodAttrs = {name : "nike prod", url: "http://nike.com/p1"};
+      
+      wantworthy.api.createProduct(prodAttrs, invalidToken, function(err, product){
+        err.message.should.equal("unauthorized");
+        done();
+      });
+    });
+
   });
 })
