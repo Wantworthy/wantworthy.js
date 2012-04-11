@@ -19,6 +19,15 @@ if(!Wantworthy) {
       },
       "accounts": {
         "url": API_URL + "/accounts"
+      },
+      "products": {
+        "url": API_URL + "/products"
+      },
+      "stores": {
+        "url": API_URL + "/stores"
+      },
+      "scrapers": {
+        "url": API_URL + "/scrapers"
       }
     },
     "schema":{
@@ -31,6 +40,22 @@ if(!Wantworthy) {
         "account":{
           "description":"A account for use with the api",
           "mediaType":"application/vnd.wantworthy.account+json;version=1.0"
+        },
+        "store":{
+          "description":"3rd party store",
+          "mediaType":"application/vnd.wantworthy.store+json;version=1.0"
+        },
+        "product":{
+          "description":"Product saved from a store",
+          "mediaType":"application/vnd.wantworthy.product+json;version=1.0"
+        },
+        "products":{
+          "description":"Collection of products",
+          "mediaType":"application/vnd.wantworthy.products+json;version=1.0"
+        },
+        "scraper": {
+          "description":"rules for scraping pages of a given store",
+          "mediaType":"application/vnd.wantworthy.scraper+json;version=1.0"
         }
       }
     }
