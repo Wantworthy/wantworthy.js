@@ -95,18 +95,20 @@ if(!Wantworthy) {
     last_name: "Tester"
   };
 
+  TestHelper.account = { 
+    id: 60391,
+    email: 'test@test.com',
+    secret: 'y4bp6TeR2XJw6Shx2mnD',
+    nickname: 'tester',
+    first_name: "Tim",
+    last_name: "Tester" 
+  };
+
   TestHelper.session = {
     token: 'cR5xrr80EmkJ1okQSXCGNJJ31Iw',
     resources: {
-      account: { 
-        id: 60391,
-        email: 'test@test.com',
-        secret: 'y4bp6TeR2XJw6Shx2mnD',
-        nickname: 'tester',
-        first_name: "Tim",
-        last_name: "Tester" 
-      } 
-    } 
+      account: TestHelper.account
+    }
   };
 
   TestHelper.adminSession = {
@@ -136,6 +138,19 @@ if(!Wantworthy) {
         roles : ['admin']
       } 
     } 
+  };
+
+  TestHelper.nikeProduct = {
+    "id":"a4705e6f2f2ad251daeee91526dd3bea",
+    "accountID":TestHelper.account.id,
+    "name":"test nike product",
+    "brand":"Nike",
+    "price":"$44.00",
+    "url":"http://www.nike.com/products/shirt",
+    "domain":"nike.com",
+    "currency":"USD",
+    "ctime":1334159775886,
+    "purchased":false
   };
 
   TestHelper.validRegisterParams = function(){

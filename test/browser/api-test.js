@@ -50,4 +50,21 @@ describe("Api", function() {
     });
 
   });
+
+  describe("Create Product", function() {
+    beforeEach(function() {
+      wantworthy.api.setDescription(TestHelper.mockDescription);
+    });
+
+    it("should return created product", function(done){
+      var session = TestHelper.session,
+          prodAttrs = {name : "nike prod", url: "http://nike.com/p1"};
+      
+      wantworthy.api.createProduct(prodAttrs, session.token, function(err, product){
+        product.should.eql(TestHelper.nikeProduct);
+        done();
+      });
+    });
+
+  });
 })

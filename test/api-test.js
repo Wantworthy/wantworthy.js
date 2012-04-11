@@ -79,7 +79,6 @@ describe("API", function() {
         done();
       });
     });
-
   });
 
   describe("Get Session", function() {
@@ -95,6 +94,29 @@ describe("API", function() {
         session.should.eql(helper.session);
         done();
       });
+    });
+  });
+
+  describe("Create Product", function() {
+    beforeEach(function() {
+      api.setDescription(helper.mockDescription);
+    });
+
+    it("should return created product", function(done){
+      var token = helper.session.token,
+          prodAttrs = {name : "nike prod", url: "http://nike.com/p1"};
+
+      apiServer
+        .matchHeader('accept', api.mediaType("product"))
+        .matchHeader('Authorization', "token "+ token)
+        .post("/products", prodAttrs)
+        .reply(201, helper.nikeProduct, {'content-type': api.mediaType("product") });
+
+      api.createProduct(prodAttrs, token, function(err, product){
+        product.should.eql(helper.nikeProduct);
+        done();
+      });
+
     });
   });
 });

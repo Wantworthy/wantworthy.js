@@ -32,9 +32,13 @@ app.get('/sessions/:token', function(req, res) {
   }
 });
 
+app.post('/products', function(req, res) {
+  res.send(helper.nikeProduct, {'Content-Type' : helper.mediaType("product") }, 201);
+});
+
 function cors(req, res, next) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
-  res.setHeader('Access-Control-Allow-Headers', 'content-type, Accept, X-Requested-With');
+  res.setHeader('Access-Control-Allow-Headers', 'content-type, Accept, X-Requested-With, Authorization');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Max-Age', '*');
 
