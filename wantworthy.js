@@ -108,10 +108,18 @@ API.prototype.createAccount = function(accountParams, callback) {
 };
 
 API.prototype.getSession = function(token, callback) {
-  request
-    .get(this.urlFor('sessions') + '/' + token)
-    .set('Accept', this.mediaType('session'))
-    .end(parseResponse(callback));
+  if (!callback || typeof callback != "function") {
+    callback = options;
+    token = null;
+  }
+
+  var r = request
+    .get(this.urlFor('sessions'))
+    .set('Accept', this.mediaType('session'));
+
+  if(token) r.set('Authorization', "token " + token)
+    
+  r.end(parseResponse(callback));
 };
 
 API.prototype.createProduct = function(prodAttrs, token, callback) {

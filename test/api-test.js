@@ -88,9 +88,14 @@ describe("API", function() {
 
     it("should return session for token", function(done){
       var token = helper.session.token;
-      apiServer.get("/sessions/"+ token).reply(200, helper.session, {'content-type': api.mediaType("session") });
 
-      api.getSession(token, function(err, session){
+      apiServer
+        .matchHeader('accept', api.mediaType("session"))
+        .matchHeader('Authorization', "token "+ token)
+        .get("/sessions")
+        .reply(200, helper.session, {'content-type': api.mediaType("session") });
+
+      api.getSession(token, function(err, session) {
         session.should.eql(helper.session);
         done();
       });
