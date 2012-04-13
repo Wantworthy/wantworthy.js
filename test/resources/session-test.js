@@ -1,5 +1,5 @@
-var Session = require("../lib/wantworthy/resources/session").Session,
-    helper = require("./test-helper").TestHelper,
+var Session = require("../../lib/wantworthy/resources/session").Session,
+    helper = require("../test-helper").TestHelper,
     chai = require('chai'),
     should = chai.should();
 
