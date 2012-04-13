@@ -153,6 +153,34 @@ if(!Wantworthy) {
     "purchased":false
   };
 
+  TestHelper.amazonProduct = {
+    "id":"84e00d538f44bb58f70229625675d282",
+    "accountID":TestHelper.account.id,
+    "name":"test amazon product",
+    "brand":"Amazon",
+    "price":"$45.99",
+    "url":"http://www.amazon.com/product/shirt-123",
+    "domain":"amazon.com",
+    "currency":"USD",
+    "ctime":1334243881161,
+    "purchased":false
+  };
+
+  TestHelper.bestbuyProduct = {
+    "id":"a1dd39557ba025979704b786bddd50bc",
+    "accountID":TestHelper.account.id,
+    "name":"test tv",
+    "brand":"Song",
+    "price":"$1201.99",
+    "url":"http://www.bestbuy.com/tvs/sony-bravia.html",
+    "domain":"bestbuy.com",
+    "currency":"USD",
+    "ctime":1334243881160,
+    "purchased":false
+   };
+
+  TestHelper.products = [TestHelper.nikeProduct, TestHelper.amazonProduct, TestHelper.bestbuyProduct];
+
   TestHelper.validRegisterParams = function(){
     return {
       email : "test9123@test.com",

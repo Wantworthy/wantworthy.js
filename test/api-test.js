@@ -140,4 +140,41 @@ describe("API", function() {
 
     });
   });
+
+  describe("Get Products", function() {
+    beforeEach(function() {
+      api.setDescription(helper.mockDescription);
+    });
+
+    it("should return products by account id", function(done){
+      var account = helper.session.resources.account;
+      var testProducts = [helper.nikeProduct, helper.amazonProduct, helper.bestbuyProduct];
+
+      apiServer
+        .matchHeader('accept', api.mediaType("products"))
+        .get("/products?accountID=" + account.id)
+        .reply(200, testProducts, {'content-type': api.mediaType("products") });
+
+      api.getProducts({accountID: account.id}, function(err, products) {
+        products.should.have.length(3);
+        done();
+      });
+    });
+
+    it("should get products by account id and purchased", function(done){
+      var account = helper.session.resources.account;
+      var testProducts = [helper.nikeProduct, helper.amazonProduct];
+
+      apiServer
+        .matchHeader('accept', api.mediaType("products"))
+        .get("/products?accountID=" + account.id + "&purchased=true")
+        .reply(200, testProducts, {'content-type': api.mediaType("products") });
+
+      api.getProducts({accountID: account.id, purchased:true}, function(err, products) {
+        products.should.have.length(2);
+        done();
+      });
+    });
+
+  });
 });

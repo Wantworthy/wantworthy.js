@@ -109,7 +109,7 @@ API.prototype.createAccount = function(accountParams, callback) {
 
 API.prototype.getSession = function(token, callback) {
   if (!callback || typeof callback != "function") {
-    callback = options;
+    callback = token;
     token = null;
   }
 
@@ -129,6 +129,19 @@ API.prototype.createProduct = function(prodAttrs, token, callback) {
     .set('Authorization', "token " + token)
     .set('Accept', this.mediaType('product'))
     .send(prodAttrs)
+    .end(parseResponse(callback));
+};
+
+API.prototype.getProducts = function(options, callback) {
+  if (!callback || typeof callback != "function") {
+    callback = options;
+    options = {};
+  }
+
+  request
+    .get(this.urlFor('products'))
+    .send(options)
+    .set('Accept', this.mediaType('products'))
     .end(parseResponse(callback));
 };
 

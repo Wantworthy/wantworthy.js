@@ -40,6 +40,10 @@ app.post('/products', function(req, res) {
   }
 });
 
+app.get('/products', function(req, res) {
+  res.send(helper.products, {'Content-Type' : helper.mediaType("products") }, 200);
+});
+
 function cors(req, res, next) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
   res.setHeader('Access-Control-Allow-Headers', 'content-type, Accept, X-Requested-With, Authorization');

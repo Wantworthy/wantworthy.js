@@ -77,4 +77,21 @@ describe("Api", function() {
     });
 
   });
+
+  
+  describe("Get Products", function() {
+    beforeEach(function() {
+      wantworthy.api.setDescription(TestHelper.mockDescription);
+    });
+
+    it("should return products", function(done){
+      var account = TestHelper.session.resources.account;
+
+      wantworthy.api.getProducts({accountID : account.id}, function(err, products){
+        products.should.eql(TestHelper.products);
+        done();
+      });
+    });
+
+  });  
 })
