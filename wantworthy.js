@@ -132,6 +132,23 @@ API.prototype.createProduct = function(prodAttrs, token, callback) {
     .end(parseResponse(callback));
 };
 
+API.prototype.updateProduct = function(id, updates, token, callback) {
+  request
+    .put(this.urlFor('products') + "/" + id)
+    .type(this.mediaType('product'))
+    .set('Authorization', "token " + token)
+    .set('Accept', this.mediaType('product'))
+    .send(updates)
+    .end(parseResponse(callback));
+};
+
+API.prototype.deleteProduct = function(id, token, callback) {
+  request
+    .del(this.urlFor('products') + "/" + id)
+    .set('Authorization', "token " + token)
+    .end(parseResponse(callback));
+};
+
 API.prototype.getProducts = function(options, callback) {
   if (!callback || typeof callback != "function") {
     callback = options;

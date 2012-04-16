@@ -177,4 +177,45 @@ describe("API", function() {
     });
 
   });
+
+  describe("Update Product", function() {
+    beforeEach(function() {
+      api.setDescription(helper.mockDescription);
+    });
+
+    it("should return updated product", function(done){
+      var token = helper.session.token;
+
+      apiServer
+        .matchHeader('accept', api.mediaType("product"))
+        .matchHeader('Authorization', "token "+ token)
+        .put("/products/123", {purchased : true})
+        .reply(200, helper.nikeProduct, {'content-type': api.mediaType("product") });
+
+      api.updateProduct(123, {purchased: true}, token, function(err, product){
+        product.should.eql(helper.nikeProduct);
+        done();
+      });
+    });
+  });
+
+  describe("Delete Product", function() {
+    beforeEach(function() {
+      api.setDescription(helper.mockDescription);
+    });
+
+    it("should make delete request", function(done){
+      var token = helper.session.token;
+
+      apiServer
+        .matchHeader('Authorization', "token "+ token)
+        .delete("/products/123")
+        .reply(200, 'OK');
+
+      api.deleteProduct(123, token, function(err){
+        done();
+      });
+    });
+  });
+
 });
