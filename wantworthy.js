@@ -976,7 +976,7 @@ var superagent = function(exports){
     xhr.open(this.method, this.url, true);
     
     if("withCredentials" in xhr) {
-      xhr.withCredentials = "true";
+      xhr.withCredentials = true;
     }
 
     // body
