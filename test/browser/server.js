@@ -28,7 +28,7 @@ app.get('/sessions', function(req, res) {
   if(helper.session.token === parseAuthToken(req)){
     res.send(helper.session, {'Content-Type' : helper.mediaType("session") }, 200);
   } else {
-    res.send(404);
+    res.send(401);
   }
 });
 

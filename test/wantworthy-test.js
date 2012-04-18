@@ -19,13 +19,14 @@ describe("Wantworthy.js", function() {
       wantworthy.start();
     });
 
-    it("should NOT make get session request", function(done) {
+    it("should make get session request with null token", function(done) {
       wantworthy.api.discover = function(cb) {
         cb();
       };
 
       wantworthy.api.getSession = function(token, cb){
-        throw new Error("Get Session Called");
+        should.not.exist(token);
+        cb(null, null);
       };
 
       wantworthy.start(done);

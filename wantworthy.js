@@ -168,8 +168,14 @@ function parseResponse(callback) {
       if(res.ok) {
         return callback(null, JSON.parse(res.text));
       } else if(res.unauthorized){
-        return callback(new Error(res.text));
-      }else {
+        var error = new Error(res.text);
+        error.statusCode = res.status;
+        return callback(error);
+      } else if(res.header['content-type'] === 'text/plain'){
+        var error = new Error(res.text)
+        error.statusCode = res.status;
+        return callback(error);
+      } else {
         return callback(JSON.parse(res.text));
       }      
     } catch(err){
@@ -1171,11 +1177,7 @@ Wantworthy.prototype.start = function(sessionToken, callback) {
   this.api.discover(function(err, description){
     if(err) return callback(err);
 
-    if(sessionToken) {
-      self.loadSession(sessionToken, callback);
-    } else {
-      return callback(null);
-    }
+    return self.loadSession(sessionToken, callback);
   });
 };
 
@@ -1204,11 +1206,15 @@ Wantworthy.prototype.login = function(credentials, callback) {
 Wantworthy.prototype.loadSession = function(token, callback) {
   var self = this;
 
-  self.api.getSession(token, function(err, sessionData){
-    if(err) return callback(err);
-
-    self.session = new Session(sessionData);
-    return callback(null, self.session);
+  self.api.getSession(token, function(err, sessionData) {
+    if(err && err.statusCode != 401) return callback(err);
+    
+    if(sessionData) {
+      self.session = new Session(sessionData);
+      return callback(null, self.session);
+    } else{
+      return callback();
+    }
   });
 };
 }); // module: wantworthy.js
