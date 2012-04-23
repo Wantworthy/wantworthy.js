@@ -21,7 +21,7 @@ describe("Wantworthy.js", function() {
 
     it("should make get session request with null token", function(done) {
       wantworthy.api.discover = function(cb) {
-        cb();
+        cb(null, {resources: {} });
       };
 
       wantworthy.api.getSession = function(token, cb){
@@ -34,7 +34,7 @@ describe("Wantworthy.js", function() {
 
     it("should make get session request", function(done) {
       wantworthy.api.discover = function(cb){
-        cb();
+        cb(null, {resources: {} });
       };
 
       wantworthy.api.getSession = function(token, cb){
