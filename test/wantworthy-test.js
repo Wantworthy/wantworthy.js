@@ -21,10 +21,10 @@ describe("Wantworthy.js", function() {
 
     it("should make get session request with null token", function(done) {
       wantworthy.api.discover = function(cb) {
-        cb(null, {resources: {} });
+        cb(null, helper.mockDescription);
       };
 
-      wantworthy.api.getSession = function(token, cb){
+      Wantworthy.Session.get = function(token, cb){
         should.not.exist(token);
         cb(null, null);
       };
@@ -34,10 +34,10 @@ describe("Wantworthy.js", function() {
 
     it("should make get session request", function(done) {
       wantworthy.api.discover = function(cb){
-        cb(null, {resources: {} });
+        cb(null, helper.mockDescription);
       };
 
-      wantworthy.api.getSession = function(token, cb){
+      Wantworthy.Session.get = function(token, cb){
         token.should.equal(helper.session.token);
         cb(null, helper.session);
       };
