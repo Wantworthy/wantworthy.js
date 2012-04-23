@@ -6,17 +6,17 @@ var Session = require("../../lib/wantworthy").Session,
 describe("Session Resource", function() {
   describe("Is Admin", function(){
     it("should return true for account with wantworthy email address", function(){
-      var s = Session.new(helper.adminSession);
+      var s = new Session(helper.adminSession);
       s.isAdmin().should.be.true;
     });
 
     it("should return true for account with admin role", function(){
-      var s = Session.new(helper.adminRoleSession);
+      var s = new Session(helper.adminRoleSession);
       s.isAdmin().should.be.true;  
     });
 
     it("should return false for standard session", function(){
-      var s = Session.new(helper.session);
+      var s = new Session(helper.session);
       s.isAdmin().should.be.false;
     });
     
