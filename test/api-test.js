@@ -147,7 +147,7 @@ describe("API", function() {
     });
 
     it("should return products by account id", function(done){
-      var account = helper.session.resources.account;
+      var account = helper.session._embedded.account;
       var testProducts = [helper.nikeProduct, helper.amazonProduct, helper.bestbuyProduct];
 
       apiServer
@@ -162,7 +162,7 @@ describe("API", function() {
     });
 
     it("should get products by account id and purchased", function(done){
-      var account = helper.session.resources.account;
+      var account = helper.session._embedded.account;
       var testProducts = [helper.nikeProduct, helper.amazonProduct];
 
       apiServer

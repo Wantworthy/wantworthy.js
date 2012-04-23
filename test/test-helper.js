@@ -106,15 +106,15 @@ if(!Wantworthy) {
 
   TestHelper.session = {
     token: 'cR5xrr80EmkJ1okQSXCGNJJ31Iw',
-    resources: {
+    _embedded: {
       account: TestHelper.account
     }
   };
 
   TestHelper.adminSession = {
     token: 'cR5xrr80EmkJ1okQSXCGNJJ31Iw',
-    resources: {
-      account: { 
+    _embedded: {
+      account: {
         id: 60391,
         email: 'root@wantworthy.com',
         secret: 'y4bp6TeR2XJw6Shx2mnD',
@@ -127,8 +127,8 @@ if(!Wantworthy) {
 
   TestHelper.adminRoleSession = {
     token: 'cR5xrr80EmkJ1okQSXCGNJJ31Iw',
-    resources: {
-      account: { 
+    _embedded: {
+      account: {
         id: 87654,
         email: 'bob@bob.com',
         secret: 'y4bp6TeR2XJw6Shx2mnD',
@@ -136,8 +136,8 @@ if(!Wantworthy) {
         first_name: "Bob",
         last_name: "Bobber",
         roles : ['admin']
-      } 
-    } 
+      }
+    }
   };
 
   TestHelper.nikeProduct = {
