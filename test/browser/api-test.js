@@ -85,7 +85,7 @@ describe("Api", function() {
     });
 
     it("should return products", function(done){
-      var account = TestHelper.session.resources.account;
+      var account = TestHelper.session._embedded.account;
 
       wantworthy.api.getProducts({accountID : account.id}, function(err, products){
         products.should.eql(TestHelper.products);

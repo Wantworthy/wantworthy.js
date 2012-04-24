@@ -21,10 +21,18 @@ app.post('/sessions', function(req, res) {
 });
 
 app.post('/accounts', function(req, res) {
-  res.send(helper.session, {'Content-Type' : helper.mediaType("session") }, 201);
+  res.send(helper.accountResponse, {'Content-Type' : helper.mediaType("account") }, 201);
 });
 
 app.get('/sessions', function(req, res) {
+  if(helper.session.token === parseAuthToken(req)){
+    res.send(helper.session, {'Content-Type' : helper.mediaType("session") }, 200);
+  } else {
+    res.send(401);
+  }
+});
+
+app.get('/sessions/:token', function(req, res) {
   if(helper.session.token === parseAuthToken(req)){
     res.send(helper.session, {'Content-Type' : helper.mediaType("session") }, 200);
   } else {

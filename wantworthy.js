@@ -981,9 +981,10 @@ var superagent = function(exports){
     // initiate request
     xhr.open(this.method, this.url, true);
     
-    if("withCredentials" in xhr) {
-      xhr.withCredentials = true;
-    }
+    // if("withCredentials" in xhr) {
+    //   xhr.withCredentials = true;
+    // }
+    self.emit('xhr:opened', xhr);
 
     // body
     if ('GET' != this.method && 'HEAD' != this.method) {
@@ -1129,18 +1130,165 @@ var superagent = function(exports){
 
 }); // module: wantworthy/browser/superagent.js
 
-requireSync.register("wantworthy/resources/session.js", function(module, exports, require){
-var Session = exports.Session = function(sessionData){
-  this.name = 'session';
-  this.data = sessionData;
-  this.token = sessionData.token;
+requireSync.register("wantworthy/resource.js", function(module, exports, require){
+var Wantworthy = require("../wantworthy");
 
-  this.resources = this.data.resources;
-  this.account = this.resources.account;
+var Resource = exports.Resource = function(attrs) {
+  var self = this;
+
+  this._attributes = attrs;
+
+  if(this._attributes) {
+    Object.keys(attrs).forEach(function(key){
+      self[key] = attrs[key];
+    });
+  }
 };
 
+Resource._request = require('wantworthy/browser/superagent');
+
+Resource.get = function (id, callback) {
+  var r = this._request
+    .get(this.url() + "/" + id)
+    .set('Accept', this.schema.mediaType);
+
+  if(Wantworthy.auth) r.set('Authorization', "token " + Wantworthy.auth.token)
+  
+  r.end(this.parseResponse(callback));
+};
+
+Resource.create = function (attrs, callback) {
+  var r = this._request
+    .post(this.url())
+    .set('Accept', this.schema.mediaType);
+
+  if(Wantworthy.auth) r.set('Authorization', "token " + Wantworthy.auth.token)
+
+  r.send(attrs).end(this.parseResponse(callback));
+};
+
+Resource.new = function (attrs) {
+  return new(this)(attrs);
+};
+
+Resource.url = function() {
+  return this.links.self.href;
+};
+
+Resource.parseResponse = function(callback) {
+  var self = this;
+
+  return function parser(res) {
+    try {
+      if(res.ok) {
+        return callback(null, self.new(JSON.parse(res.text) ));
+      } else if(res.unauthorized) {
+        var error = new Error(res.text);
+        error.statusCode = res.status;
+        return callback(error);
+      } else if(res.header['content-type'] === 'text/plain'){
+        var error = new Error(res.text)
+        error.statusCode = res.status;
+        return callback(error);
+      } else {
+        return callback(JSON.parse(res.text));
+      }  
+    } catch(err){
+      return callback(err);
+    }
+  }
+};
+
+Resource.prototype.toString = function () {
+  return JSON.stringify(this._attributes);
+};
+
+// var Want = require("./lib/wantworthy");
+// var w = new Want({url: "http://api.dev.wantworthy.com:9000"});
+// w.start(console.log);
+// w.login({email : "test@test.com", password: "test123"}, console.log);
+// Want.Product.create({name : "foo", url: "http://amazon.com/prod/133"}, console.log);
+}); // module: wantworthy/resource.js
+
+requireSync.register("wantworthy/resourceful.js", function(module, exports, require){
+var resourceful = exports;
+
+resourceful.resources  = {};
+resourceful.Resource   = require('./resource').Resource;
+
+resourceful.define = function (name) {
+
+  var Factory = function Factory (attrs) {
+    var self = this;
+
+    if(attrs && attrs._embedded) {
+      Object.keys(attrs._embedded).forEach(function(resourceName){
+        if(resourceful.resources[resourceName]) {
+          self[resourceName] = new(resourceful.resources[resourceName])(attrs._embedded[resourceName]);
+        } else{
+          self[resourceName] = attrs._embedded[resourceName];
+        }
+      });
+
+      delete attrs._embedded;
+    };
+
+    if(attrs && attrs._links) {
+      self.links = attrs._links;
+      delete attrs._links; 
+    }
+    
+    resourceful.Resource.call(this, attrs);
+  };
+
+  //
+  // Setup inheritance
+  //
+  Factory.__proto__ = resourceful.Resource;
+  Factory.prototype.__proto__ = resourceful.Resource.prototype;
+
+  //
+  // Setup defaults
+  //
+  Factory.resource  = name;
+  Factory.version = "1.0";
+  Factory.links = {};
+  Factory.schema = {};
+
+  resourceful.register(name, Factory);
+
+  return Factory;
+};
+
+resourceful.register = function (name, Factory) {
+  return this.resources[name] = Factory;
+};
+
+resourceful.setDescription = function(description) {
+  var self = this;
+
+  Object.keys(description.resources).forEach(function(resourceName) {
+    var singularName = resourceName.substr(0, resourceName.length-1);
+
+    var Factory = self.resources[singularName];
+    if(!Factory) {
+      return;
+    }
+
+    Factory.links["self"] = {href : description.resources[resourceName].url};
+    Factory.schema.mediaType = description.schema[Factory.version][singularName].mediaType;
+    Factory.schema.description = description.schema[Factory.version][singularName].description;
+  });
+};
+}); // module: wantworthy/resourceful.js
+
+requireSync.register("wantworthy/resources/session.js", function(module, exports, require){
+var resourceful = require("../resourceful");
+
+var Session = exports.Session = resourceful.define("session");
+
 Session.prototype.isAdmin = function() {
-  if(this.account && this.account.roles){
+  if(this.account && this.account.roles) {
     return Boolean(~this.account.roles.indexOf("admin"))
   } else if(this.account) {
     return new RegExp(/@wantworthy.com/).test(this.account.email);
@@ -1148,17 +1296,35 @@ Session.prototype.isAdmin = function() {
     return false;
   }
 };
+
+Session.get = function (token, callback) {
+  var r = this._request
+    .get(this.url())
+    .set('Accept', this.schema.mediaType);
+
+  if(token) r.set('Authorization', "token " + token);
+  
+  r.end(this.parseResponse(callback));
+};
 }); // module: wantworthy/resources/session.js
 
 requireSync.register("wantworthy.js", function(module, exports, require){
-var API = require("./wantworthy/api").API,
-    Session = require('./wantworthy/resources/session').Session;
+var API = require("./wantworthy/api").API;
+    // Session = require('./wantworthy/resources/session').Session;
 
 var Wantworthy = module.exports = function (options) {
   options = options || {};
   this.api = new API(options);
   this.started = false; // flag to know if api service has been discovered
 };
+
+Wantworthy.resourceful = require("./wantworthy/resourceful");
+
+Wantworthy.Store = Wantworthy.resourceful.define("store");
+Wantworthy.Scraper = Wantworthy.resourceful.define("scraper");
+Wantworthy.Account = Wantworthy.resourceful.define("account");
+Wantworthy.Session = require('./wantworthy/resources/session').Session;
+Wantworthy.Product = Wantworthy.resourceful.define("product");
 
 //
 // ### function start (sessionToken, done)
@@ -1174,8 +1340,10 @@ Wantworthy.prototype.start = function(sessionToken, callback) {
 
   var self = this;
 
-  this.api.discover(function(err, description){
+  this.api.discover(function(err, description) {
     if(err) return callback(err);
+
+    Wantworthy.resourceful.setDescription(description);
 
     return self.loadSession(sessionToken, callback);
   });
@@ -1184,21 +1352,25 @@ Wantworthy.prototype.start = function(sessionToken, callback) {
 Wantworthy.prototype.register = function(accountParams, callback) {
   var self = this;
 
-  self.api.createAccount(accountParams, function(err, sessionData){
+  Wantworthy.Account.create(accountParams, function(err, account){
     if(err) return callback(err);
 
-    self.session = new Session(sessionData);
-    return callback(null, self.session);
+    self.session = account.session;
+    Wantworthy.auth = self.session;
+
+    return callback(null, account);
   });
 };
 
 Wantworthy.prototype.login = function(credentials, callback) {
   var self = this;
 
-  self.api.login(credentials, function(err, sessionData){
+  Wantworthy.Session.create(credentials, function(err, session){
     if(err) return callback(err);
 
-    self.session = new Session(sessionData);
+    self.session = session;
+    Wantworthy.auth = self.session;
+
     return callback(null, self.session);
   });
 };
@@ -1206,15 +1378,13 @@ Wantworthy.prototype.login = function(credentials, callback) {
 Wantworthy.prototype.loadSession = function(token, callback) {
   var self = this;
 
-  self.api.getSession(token, function(err, sessionData) {
+  Wantworthy.Session.get(token, function(err, session) {
     if(err && err.statusCode != 401) return callback(err);
-    
-    if(sessionData) {
-      self.session = new Session(sessionData);
-      return callback(null, self.session);
-    } else{
-      return callback();
-    }
+
+    self.session = session;
+    Wantworthy.auth = self.session;
+
+    return callback(null, session);
   });
 };
 }); // module: wantworthy.js

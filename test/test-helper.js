@@ -101,7 +101,20 @@ if(!Wantworthy) {
     secret: 'y4bp6TeR2XJw6Shx2mnD',
     nickname: 'tester',
     first_name: "Tim",
-    last_name: "Tester" 
+    last_name: "Tester"
+  };
+
+  TestHelper.accountResponse = { 
+    id: 60391,
+    email: 'test@test.com',
+    secret: 'y4bp6TeR2XJw6Shx2mnD',
+    nickname: 'tester',
+    first_name: "Tim",
+    last_name: "Tester",
+
+    _embedded : {
+      session: {token: 'cR5xrr80EmkJ1okQSXCGNJJ31Iw'}
+    }
   };
 
   TestHelper.session = {
