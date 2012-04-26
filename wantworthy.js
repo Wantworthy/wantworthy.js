@@ -981,9 +981,6 @@ var superagent = function(exports){
     // initiate request
     xhr.open(this.method, this.url, true);
     
-    // if("withCredentials" in xhr) {
-    //   xhr.withCredentials = true;
-    // }
     self.emit('xhr:opened', xhr);
 
     // body
@@ -2215,7 +2212,11 @@ Resource.get = function (id, callback) {
     .get(this.url() + "/" + id)
     .set('Accept', this.schema.mediaType);
 
-  if(Wantworthy.auth) r.set('Authorization', "token " + Wantworthy.auth.token)
+  if(Wantworthy.auth) r.set('Authorization', "token " + Wantworthy.auth.token);
+
+  if(this.withCredentials['get']){
+    Resource.acceptCookiesFor(r);
+  }
   
   r.end(this.parseResponse(callback));
 };
@@ -2226,8 +2227,19 @@ Resource.create = function (attrs, callback) {
     .set('Accept', this.schema.mediaType);
 
   if(Wantworthy.auth) r.set('Authorization', "token " + Wantworthy.auth.token);
+  if(this.withCredentials['create']){
+    Resource.acceptCookiesFor(r);
+  }
 
   r.send(attrs).end(this.parseResponse(callback));
+};
+
+Resource.acceptCookiesFor = function(request) {
+  request.on("xhr:opened", function(xhr) {
+    if("withCredentials" in xhr) {
+      xhr.withCredentials = true;
+    }
+  });
 };
 
 Resource.new = function (attrs) {
@@ -2236,6 +2248,13 @@ Resource.new = function (attrs) {
 
 Resource.url = function() {
   return this.links.self.href;
+};
+
+Resource.withCredentials = {
+  get : false,
+  create : false,
+  update : false,
+  destroy : false
 };
 
 Resource.parseResponse = function(callback) {
@@ -2353,6 +2372,14 @@ resourceful.setDescription = function(description) {
 };
 }); // module: wantworthy/resourceful.js
 
+requireSync.register("wantworthy/resources/account.js", function(module, exports, require){
+var resourceful = require("../resourceful");
+
+var Account = exports.Account = resourceful.define("account");
+
+Account.withCredentials["create"] = true;
+}); // module: wantworthy/resources/account.js
+
 requireSync.register("wantworthy/resources/product.js", function(module, exports, require){
 var resourceful = require("../resourceful");
 
@@ -2377,6 +2404,13 @@ var resourceful = require("../resourceful");
 
 var Session = exports.Session = resourceful.define("session");
 
+Session.withCredentials = {
+  get : true,
+  create : true,
+  update : true,
+  destroy : true
+};
+
 Session.prototype.isAdmin = function() {
   if(this.account && this.account.roles) {
     return Boolean(~this.account.roles.indexOf("admin"))
@@ -2393,6 +2427,8 @@ Session.get = function (token, callback) {
     .set('Accept', this.schema.mediaType);
 
   if(token) r.set('Authorization', "token " + token);
+
+  this.acceptCookiesFor(r);
   
   r.end(this.parseResponse(callback));
 };
@@ -2412,7 +2448,7 @@ Wantworthy.resourceful = require("./wantworthy/resourceful");
 
 Wantworthy.Store = Wantworthy.resourceful.define("store");
 Wantworthy.Scraper = Wantworthy.resourceful.define("scraper");
-Wantworthy.Account = Wantworthy.resourceful.define("account");
+Wantworthy.Account = require('./wantworthy/resources/account').Account;
 Wantworthy.Session = require('./wantworthy/resources/session').Session;
 Wantworthy.Product = require('./wantworthy/resources/product').Product;
 
