@@ -33,6 +33,7 @@ function parse(js) {
 function parseRequires(js) {
   return js
     .replace(/require\('superagent'\)/g, "require('wantworthy/browser/superagent')")
+    .replace(/require\('underscore'\)/g, "require('wantworthy/browser/underscore')")
 }
 
 /**
