@@ -2191,7 +2191,8 @@ requireSync.register("wantworthy/browser/underscore.js", function(module, export
 }); // module: wantworthy/browser/underscore.js
 
 requireSync.register("wantworthy/resource.js", function(module, exports, require){
-var Wantworthy = require("../wantworthy");
+var Wantworthy = require("../wantworthy"),
+    _ = require('wantworthy/browser/underscore');
 
 var Resource = exports.Resource = function(attrs) {
   var self = this;
@@ -2234,6 +2235,11 @@ Resource.create = function (attrs, callback) {
   r.send(attrs).end(this.parseResponse(callback));
 };
 
+Resource.auth = function() {
+  if(!Wantworthy.auth) return {};
+
+  return {'Authorization': 'token ' + Wantworthy.auth.token };
+}
 Resource.acceptCookiesFor = function(request) {
   request.on("xhr:opened", function(xhr) {
     if("withCredentials" in xhr) {
@@ -2263,6 +2269,8 @@ Resource.parseResponse = function(callback) {
   return function parser(res) {
     try {
       if(res.ok) {
+        if(res.header['content-type'] === 'text/plain') return callback(null);
+
         return callback(null, self.new(JSON.parse(res.text) ));
       } else if(res.unauthorized) {
         var error = new Error(res.text);
@@ -2274,15 +2282,32 @@ Resource.parseResponse = function(callback) {
         return callback(error);
       } else {
         return callback(JSON.parse(res.text));
-      }  
+      }
     } catch(err){
       return callback(err);
     }
   }
 };
 
+Resource.prototype.url = function() {
+  return this.links.self.href;
+};
+
 Resource.prototype.toString = function () {
   return JSON.stringify(this._attributes);
+};
+
+Resource.prototype.update = function(attrs, callback) {
+  var r = this.constructor._request
+          .put(this.url())
+          .type(this.constructor.schema.mediaType);
+
+  if(Wantworthy.auth) r.set('Authorization', "token " + Wantworthy.auth.token);
+  if(this.constructor.withCredentials['update']) {
+    Resource.acceptCookiesFor(r);
+  }
+
+  r.send(attrs).end(this.constructor.parseResponse(callback));
 };
 
 // var Want = require("./lib/wantworthy");
@@ -2292,6 +2317,7 @@ Resource.prototype.toString = function () {
 // Want.Product.create({name : "foo", url: "http://amazon.com/prod/133"}, console.log);
 
 // Want.Scraper.get("nastygal.com", console.log);
+// Want.Account.find({slug : "root-root"}, console.log);
 }); // module: wantworthy/resource.js
 
 requireSync.register("wantworthy/resourceful.js", function(module, exports, require){
@@ -2378,6 +2404,15 @@ var resourceful = require("../resourceful");
 var Account = exports.Account = resourceful.define("account");
 
 Account.withCredentials["create"] = true;
+
+Account.find = function (params, callback) {
+  this._request
+    .get(this.url())
+    .send(params)
+    .set('Accept', this.schema.mediaType)
+    .set(this.auth())
+    .end(this.parseResponse(callback));
+};
 }); // module: wantworthy/resources/account.js
 
 requireSync.register("wantworthy/resources/product.js", function(module, exports, require){
