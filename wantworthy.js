@@ -2483,10 +2483,7 @@ Wantworthy.prototype.register = function(accountParams, callback) {
   Wantworthy.Account.create(accountParams, function(err, account){
     if(err) return callback(err);
 
-    self.session = account.session;
-    Wantworthy.auth = self.session;
-
-    return callback(null, account);
+    return self.loadSession(account.session.token, callback);
   });
 };
 
@@ -2504,6 +2501,11 @@ Wantworthy.prototype.login = function(credentials, callback) {
 };
 
 Wantworthy.prototype.loadSession = function(token, callback) {
+  if (!callback && typeof token === 'function') {
+    callback = token;
+    token = null;
+  }
+
   var self = this;
 
   Wantworthy.Session.get(token, function(err, session) {
