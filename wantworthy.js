@@ -2196,8 +2196,6 @@ var Wantworthy = require("../wantworthy"),
 
 var Resource = exports.Resource = function(attrs) {
   var self = this;
-
-  this.attributes = attrs;
 };
 
 Resource._request = require('wantworthy/browser/superagent');
@@ -2316,6 +2314,14 @@ Resource.prototype.toJSON = function () {
   return _.clone(this.attributes);
 };
 
+Resource.prototype.save = function(callback) {
+  if(this.isNew()) {
+    this.constructor.create(this.toJSON(), callback);
+  } else {
+    this.update(this.toJSON(), callback);
+  }
+};
+
 Resource.prototype.update = function(attrs, callback) {
   var r = this.constructor._request
           .put(this.url())
@@ -2327,6 +2333,10 @@ Resource.prototype.update = function(attrs, callback) {
   };
 
   r.send(attrs).end(this.constructor.parseResponse(callback));
+};
+
+Resource.prototype.isNew = function() {
+  return !this.links || !this.links.self;
 };
 
 // var Want = require("./lib/wantworthy");
@@ -2352,6 +2362,9 @@ resourceful.define = function (name) {
   var Factory = function Factory (attrs) {
     var self = this;
 
+    self.links = {};
+    self.attributes = {};
+
     if(attrs && attrs._embedded) {
       Object.keys(attrs._embedded).forEach(function(resourceName){
         if(resourceful.resources[resourceName]) {
@@ -2373,6 +2386,7 @@ resourceful.define = function (name) {
       delete attrs._links;
     }
     
+    self.attributes = attrs;
     resourceful.Resource.call(this, attrs);
   };
 

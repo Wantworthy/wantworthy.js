@@ -75,6 +75,48 @@ describe("Resource", function() {
         p.has("url").should.equal(false);
       });
     });
+
+
+    describe("is new", function() {
+      
+      it("should return true", function() {
+        var p = new Product({name : "foo"});
+        p.isNew().should.be.true;
+      });
+
+      it("should return false", function() {
+        var p = new Product({name : "foo"});
+        p.links.self = {href  : "http://api.wantworthy.com/products/123"};
+        p.isNew().should.be.false;
+      });
+    });
+
+    describe("save", function() {
+      
+      it("should create new resource", function(done) {
+        var p = new Product({name : "foo"});
+
+        apiServer.post('/products', p.toJSON()).reply(200, helper.amazonProduct, {'content-type': Product.schema.mediaType});
+        
+        p.save(function(err, prod){
+          prod.get('id').should.equal(helper.amazonProduct.id);
+          done();
+        });
+      });
+
+      it("should update existing product", function(done) {
+        var p = new Product({name : "existing"});
+        p.links.self = {href : Product.url() + "/12345"};
+        
+        apiServer.put("/products/12345", p.toJSON()).reply(200, helper.amazonProduct, {'content-type': Product.schema.mediaType});
+        
+        p.save(function(err, prod){
+          prod.get('id').should.equal(helper.amazonProduct.id);
+          done();
+        });
+      });
+
+    });
     
   });
 
