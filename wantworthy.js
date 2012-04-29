@@ -2197,13 +2197,7 @@ var Wantworthy = require("../wantworthy"),
 var Resource = exports.Resource = function(attrs) {
   var self = this;
 
-  this._attributes = attrs;
-
-  if(this._attributes) {
-    Object.keys(attrs).forEach(function(key){
-      self[key] = attrs[key];
-    });
-  }
+  this.attributes = attrs;
 };
 
 Resource._request = require('wantworthy/browser/superagent');
@@ -2211,9 +2205,8 @@ Resource._request = require('wantworthy/browser/superagent');
 Resource.get = function (id, callback) {
   var r = this._request
     .get(this.url() + "/" + id)
-    .set('Accept', this.schema.mediaType);
-
-  if(Wantworthy.auth) r.set('Authorization', "token " + Wantworthy.auth.token);
+    .set('Accept', this.schema.mediaType)
+    .set(this.auth());
 
   if(this.withCredentials['get']){
     Resource.acceptCookiesFor(r);
@@ -2225,9 +2218,9 @@ Resource.get = function (id, callback) {
 Resource.create = function (attrs, callback) {
   var r = this._request
     .post(this.url())
-    .set('Accept', this.schema.mediaType);
+    .set('Accept', this.schema.mediaType)
+    .set(this.auth());
 
-  if(Wantworthy.auth) r.set('Authorization', "token " + Wantworthy.auth.token);
   if(this.withCredentials['create']){
     Resource.acceptCookiesFor(r);
   }
@@ -2238,7 +2231,7 @@ Resource.create = function (attrs, callback) {
 Resource.auth = function() {
   if(!Wantworthy.auth) return {};
 
-  return {'Authorization': 'token ' + Wantworthy.auth.token };
+  return {'Authorization': 'token ' + Wantworthy.auth.get('token') };
 }
 Resource.acceptCookiesFor = function(request) {
   request.on("xhr:opened", function(xhr) {
@@ -2289,23 +2282,49 @@ Resource.parseResponse = function(callback) {
   }
 };
 
+Resource.prototype.get = function(attr) {
+  return this.attributes[attr];
+};
+
+Resource.prototype.set = function(key, value) {
+  var attrs, attr, val;
+
+  // Handle both `"key", value` and `{key: value}` -style arguments.
+  if (_.isObject(key) || key == null) {
+    attrs = key;
+  } else {
+    attrs = {};
+    attrs[key] = value;
+  }
+
+  _.extend(this.attributes, attrs);
+};
+
+Resource.prototype.has = function(attr) {
+  return this.get(attr) != null;
+},
+
 Resource.prototype.url = function() {
   return this.links.self.href;
 };
 
 Resource.prototype.toString = function () {
-  return JSON.stringify(this._attributes);
+  return JSON.stringify(this.attributes);
+};
+
+Resource.prototype.toJSON = function () {
+  return _.clone(this.attributes);
 };
 
 Resource.prototype.update = function(attrs, callback) {
   var r = this.constructor._request
           .put(this.url())
-          .type(this.constructor.schema.mediaType);
+          .type(this.constructor.schema.mediaType)
+          .set(Resource.auth());
 
-  if(Wantworthy.auth) r.set('Authorization', "token " + Wantworthy.auth.token);
   if(this.constructor.withCredentials['update']) {
     Resource.acceptCookiesFor(r);
-  }
+  };
 
   r.send(attrs).end(this.constructor.parseResponse(callback));
 };
@@ -2351,7 +2370,7 @@ resourceful.define = function (name) {
 
     if(attrs && attrs._links) {
       self.links = attrs._links;
-      delete attrs._links; 
+      delete attrs._links;
     }
     
     resourceful.Resource.call(this, attrs);
@@ -2447,10 +2466,10 @@ Session.withCredentials = {
 };
 
 Session.prototype.isAdmin = function() {
-  if(this.account && this.account.roles) {
-    return Boolean(~this.account.roles.indexOf("admin"))
+  if(this.account && this.account.has('roles') ) {
+    return Boolean(~this.account.get('roles').indexOf("admin"))
   } else if(this.account) {
-    return new RegExp(/@wantworthy.com/).test(this.account.email);
+    return new RegExp(/@wantworthy.com/).test(this.account.get("email"));
   } else {
     return false;
   }
@@ -2518,7 +2537,7 @@ Wantworthy.prototype.register = function(accountParams, callback) {
   Wantworthy.Account.create(accountParams, function(err, account){
     if(err) return callback(err);
 
-    return self.loadSession(account.session.token, callback);
+    return self.loadSession(account.session.get('token'), callback);
   });
 };
 
