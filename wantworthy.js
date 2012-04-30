@@ -2386,7 +2386,8 @@ resourceful.define = function (name) {
       delete attrs._links;
     }
     
-    self.attributes = attrs;
+    if(attrs) self.attributes = attrs;
+    
     resourceful.Resource.call(this, attrs);
   };
 
