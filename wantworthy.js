@@ -2322,6 +2322,22 @@ Resource.prototype.save = function(callback) {
   }
 };
 
+Resource.prototype.destroy = function(callback) {
+  if(this.isNew()) {
+    return callback(); // nothing to delete on the server
+  } else {
+    var r = this.constructor._request
+            .del(this.url())
+            .set(Resource.auth());
+
+    if(this.constructor.withCredentials['update']) {
+      Resource.acceptCookiesFor(r);
+    }
+
+    r.end(this.constructor.parseResponse(callback));
+  };
+};
+
 Resource.prototype.update = function(attrs, callback) {
   var r = this.constructor._request
           .put(this.url())
@@ -2552,7 +2568,7 @@ Wantworthy.prototype.register = function(accountParams, callback) {
   Wantworthy.Account.create(accountParams, function(err, account){
     if(err) return callback(err);
 
-    return self.loadSession(account.session.get('token'), callback);
+    return self.login({secret : account.get("secret")}, callback);
   });
 };
 
