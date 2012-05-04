@@ -2258,24 +2258,25 @@ Resource.parseResponse = function(callback) {
   var self = this;
 
   return function parser(res) {
-    try {
-      if(res.ok) {
-        if(res.header['content-type'] === 'text/plain') return callback(null);
+    var parser = function(x) { return x; };
 
-        return callback(null, self.new(JSON.parse(res.text) ));
-      } else if(res.unauthorized) {
-        var error = new Error(res.text);
-        error.statusCode = res.status;
-        return callback(error);
-      } else if(res.header['content-type'] === 'text/plain'){
-        var error = new Error(res.text)
-        error.statusCode = res.status;
-        return callback(error);
-      } else {
-        return callback(JSON.parse(res.text));
+    if(res.header['content-type'] ) {
+      var type = res.header['content-type'];
+      var content = type.split(";")[0].split(/\+|\//);
+
+      if(content && ~content.indexOf('json')){
+        parser = JSON.parse;
       }
-    } catch(err){
-      return callback(err);
+    }
+
+    if(res.ok) {
+      if(res.header['content-type'] === 'text/plain') return callback(null, parser(res.text));
+
+      return callback(null, self.new(parser(res.text) ));
+    } else {
+      var error = new Error(parser(res.text));
+      error.statusCode = res.status;
+      return callback(error);
     }
   }
 };
