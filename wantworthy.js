@@ -2204,7 +2204,8 @@ Resource.get = function (id, callback) {
   var r = this._request
     .get(this.url() + "/" + id)
     .set('Accept', this.schema.mediaType)
-    .set(this.auth());
+    .set(this.auth())
+    .on('error', callback);
 
   if(this.withCredentials['get']){
     Resource.acceptCookiesFor(r);
@@ -2217,7 +2218,8 @@ Resource.create = function (attrs, callback) {
   var r = this._request
     .post(this.url())
     .set('Accept', this.schema.mediaType)
-    .set(this.auth());
+    .set(this.auth())
+    .on('error', callback);
 
   if(this.withCredentials['create']){
     Resource.acceptCookiesFor(r);
@@ -2274,7 +2276,11 @@ Resource.parseResponse = function(callback) {
 
       return callback(null, self.new(parser(res.text) ));
     } else {
-      var error = new Error(parser(res.text));
+      var message = "client error";
+      if(res.serverError) message = "server error";
+      
+      var error = new Error(message);
+      error.body = parser(res.text)
       error.statusCode = res.status;
       return callback(error);
     }
@@ -2329,7 +2335,8 @@ Resource.prototype.destroy = function(callback) {
   } else {
     var r = this.constructor._request
             .del(this.url())
-            .set(Resource.auth());
+            .set(Resource.auth())
+            .on('error', callback);
 
     if(this.constructor.withCredentials['update']) {
       Resource.acceptCookiesFor(r);
@@ -2343,7 +2350,8 @@ Resource.prototype.update = function(attrs, callback) {
   var r = this.constructor._request
           .put(this.url())
           .type(this.constructor.schema.mediaType)
-          .set(Resource.auth());
+          .set(Resource.auth())
+          .on('error', callback);
 
   if(this.constructor.withCredentials['update']) {
     Resource.acceptCookiesFor(r);
@@ -2462,6 +2470,7 @@ Account.find = function (params, callback) {
     .send(params)
     .set('Accept', this.schema.mediaType)
     .set(this.auth())
+    .on('error', callback)
     .end(this.parseResponse(callback));
 };
 }); // module: wantworthy/resources/account.js
@@ -2480,6 +2489,7 @@ Product.search = function(options, callback) {
   this._request
     .get(this.url())
     .send(options)
+    .on('error', callback)
     // .set('Accept', this.schema.mediaType)
     .end(this.parseResponse(callback));
 };
@@ -2510,7 +2520,8 @@ Session.prototype.isAdmin = function() {
 Session.get = function (token, callback) {
   var r = this._request
     .get(this.url())
-    .set('Accept', this.schema.mediaType);
+    .set('Accept', this.schema.mediaType)
+    .on('error', callback);
 
   if(token) r.set('Authorization', "token " + token);
 
