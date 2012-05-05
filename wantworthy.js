@@ -2419,8 +2419,11 @@ resourceful.define = function (name) {
   //
   // Setup inheritance
   //
-  Factory.__proto__ = resourceful.Resource;
-  Factory.prototype.__proto__ = resourceful.Resource.prototype;
+  _.extend(Factory, resourceful.Resource);
+  _.extend(Factory.prototype, resourceful.Resource.prototype);
+  
+  // Factory.__proto__ = resourceful.Resource;
+  // Factory.prototype.__proto__ = resourceful.Resource.prototype;
 
   //
   // Setup defaults
