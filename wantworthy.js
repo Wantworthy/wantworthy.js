@@ -2476,6 +2476,15 @@ Account.find = function (params, callback) {
     .on('error', callback)
     .end(this.parseResponse(callback));
 };
+
+Account.prototype.productGroups = function (callback) {
+  if(!this.links || !this.links.productGroups) return callback();
+
+  this.constructor._request
+    .get(this.links.productGroups.href)
+    .on('error', callback)
+    .end(this.constructor.parseResponse(callback));
+};
 }); // module: wantworthy/resources/account.js
 
 requireSync.register("wantworthy/resources/product.js", function(module, exports, require){
