@@ -2313,6 +2313,10 @@ Resource.prototype.url = function() {
   return this.links.self.href;
 };
 
+Resource.prototype.auth = function() {
+  return this.constructor.auth();
+};
+
 Resource.prototype.toString = function () {
   return JSON.stringify(this.attributes);
 };
@@ -2487,6 +2491,31 @@ Account.prototype.productGroups = function (callback) {
 };
 }); // module: wantworthy/resources/account.js
 
+requireSync.register("wantworthy/resources/group.js", function(module, exports, require){
+var resourceful = require("../resourceful");
+
+var Group = exports.Group = resourceful.define("group");
+
+Group.list = function(accountID, callback) {
+  this._request
+    .get(this.url() + "/" + accountID)
+    .on('error', callback)
+    // .set('Accept', this.schema.mediaType)
+    .end(this.parseResponse(callback));
+};
+
+Group.prototype.rename = function(name, callback) {
+  this.set({"name" : name});
+
+  this.constructor._request
+    .post(this.url())
+    .set(this.auth())
+    .on('error', callback)
+    .send({name : name})
+    .end(this.constructor.parseResponse(callback));
+};
+}); // module: wantworthy/resources/group.js
+
 requireSync.register("wantworthy/resources/product.js", function(module, exports, require){
 var resourceful = require("../resourceful");
 
@@ -2560,6 +2589,7 @@ Wantworthy.Scraper = Wantworthy.resourceful.define("scraper");
 Wantworthy.Account = require('./wantworthy/resources/account').Account;
 Wantworthy.Session = require('./wantworthy/resources/session').Session;
 Wantworthy.Product = require('./wantworthy/resources/product').Product;
+Wantworthy.Group = require('./wantworthy/resources/group').Group;
 
 //
 // ### function start (sessionToken, done)
