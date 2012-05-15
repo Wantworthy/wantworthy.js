@@ -2517,7 +2517,7 @@ Group.prototype.rename = function(name, callback) {
 };
 
 Group.prototype.addProduct = function(productID, callback) {
-  var productIds = this.get("productIds");
+  var productIds = this.get("productIds") || [];
   productIds.push(productID);
 
   this.set("productIds", productIds);
@@ -2531,7 +2531,7 @@ Group.prototype.addProduct = function(productID, callback) {
 };
 
 Group.prototype.removeProduct = function(productID, callback) {
-  var productIds = this.get("productIds");
+  var productIds = this.get("productIds") || [];
   productIds = _.without(productIds, productID);
   
   this.set("productIds", productIds);
