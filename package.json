@@ -22,7 +22,8 @@
     "mocha" : "1.0.x",
     "chai" : "0.5.x",
     "nock" : "0.11.x",
-    "express": "2.5.x"
+    "express": "2.5.x",
+    "jshint" : "0.7.x"
   },
   "scripts": {
     "test"  : "make test"
