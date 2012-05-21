@@ -89,90 +89,18 @@ API.prototype.setDescription = function(description) {
   });
 };
 
-API.prototype.login = function(auth, callback) {
-  request
-    .post(this.urlFor('sessions'))
-    .type(this.mediaType('account'))
-    .set('Accept', this.mediaType('session'))
-    .send(auth)
-    .end(parseResponse(callback));
-};
-
-API.prototype.createAccount = function(accountParams, callback) {
-  request
-    .post(this.urlFor('accounts'))
-    .type(this.mediaType('account'))
-    .set('Accept', this.mediaType('session'))
-    .send(accountParams)
-    .end(parseResponse(callback));
-};
-
-API.prototype.getSession = function(token, callback) {
-  if (!callback || typeof callback != "function") {
-    callback = token;
-    token = null;
-  }
-
-  var r = request
-    .get(this.urlFor('sessions'))
-    .set('Accept', this.mediaType('session'));
-
-  if(token) r.set('Authorization', "token " + token)
-    
-  r.end(parseResponse(callback));
-};
-
-API.prototype.createProduct = function(prodAttrs, token, callback) {
-  request
-    .post(this.urlFor('products'))
-    .type(this.mediaType('product'))
-    .set('Authorization', "token " + token)
-    .set('Accept', this.mediaType('product'))
-    .send(prodAttrs)
-    .end(parseResponse(callback));
-};
-
-API.prototype.updateProduct = function(id, updates, token, callback) {
-  request
-    .put(this.urlFor('products') + "/" + id)
-    .type(this.mediaType('product'))
-    .set('Authorization', "token " + token)
-    .set('Accept', this.mediaType('product'))
-    .send(updates)
-    .end(parseResponse(callback));
-};
-
-API.prototype.deleteProduct = function(id, token, callback) {
-  request
-    .del(this.urlFor('products') + "/" + id)
-    .set('Authorization', "token " + token)
-    .end(parseResponse(callback));
-};
-
-API.prototype.getProducts = function(options, callback) {
-  if (!callback || typeof callback != "function") {
-    callback = options;
-    options = {};
-  }
-
-  request
-    .get(this.urlFor('products'))
-    .send(options)
-    .set('Accept', this.mediaType('products'))
-    .end(parseResponse(callback));
-};
-
 function parseResponse(callback) {
   return function parser(res) {
+    var error;
     try {
       if(res.ok) {
         return callback(null, JSON.parse(res.text));
       } else if(res.unauthorized){
-        var error = new Error(res.text);
+        error = new Error(res.text);
         error.statusCode = res.status;
         return callback(error);
       } else if(res.header['content-type'] === 'text/plain'){
-        var error = new Error(res.text)
+        error = new Error(res.text)
         error.statusCode = res.status;
         return callback(error);
       } else {
@@ -195,30 +123,6 @@ API.prototype.discoverRequest = function(callback) {
 
       return callback(null, JSON.parse(res.text));
     });
-};
-
-API.prototype.mediaType = function (resourceName) {
-  if (!this.schema) {
-    throw "No description object.  Run `wantworthy.api.discover` first.";
-  }
-
-  if (!this.schema[resourceName]) {
-    throw "No schema for resource " + resourceName;
-  }
-
-  return this.schema[resourceName].mediaType;
-};
-
-API.prototype.urlFor = function (resourceName) {
-  if (!this.description) {
-    throw "No description object.  Run `wantworthy.api.discover` first.";
-  }
-
-  if (!this.description.resources[resourceName]) {
-    throw "No schema for resource " + resourceName;
-  }
-
-  return this.description.resources[resourceName].url;
 };
 }); // module: wantworthy/api.js
 
@@ -2207,7 +2111,7 @@ Resource.get = function (id, callback) {
     .set(this.auth())
     .on('error', callback);
 
-  if(this.withCredentials['get']){
+  if(this.withCredentials.get) {
     Resource.acceptCookiesFor(r);
   }
   
@@ -2221,7 +2125,7 @@ Resource.create = function (attrs, callback) {
     .set(this.auth())
     .on('error', callback);
 
-  if(this.withCredentials['create']){
+  if(this.withCredentials.create){
     Resource.acceptCookiesFor(r);
   }
 
@@ -2241,7 +2145,7 @@ Resource.acceptCookiesFor = function(request) {
   });
 };
 
-Resource.new = function (attrs) {
+Resource.init = function (attrs) {
   return new(this)(attrs);
 };
 
@@ -2260,27 +2164,27 @@ Resource.parseResponse = function(callback) {
   var self = this;
 
   return function parser(res) {
-    var parser = function(x) { return x; };
+    var parse = function(x) { return x; };
 
     if(res.header['content-type'] ) {
       var type = res.header['content-type'];
       var content = type.split(";")[0].split(/\+|\//);
 
       if(content && ~content.indexOf('json')){
-        parser = JSON.parse;
+        parse = JSON.parse;
       }
     }
 
     if(res.ok) {
-      if(res.header['content-type'] === 'text/plain') return callback(null, parser(res.text));
+      if(res.header['content-type'] === 'text/plain') return callback(null, parse(res.text));
 
-      return callback(null, self.new(parser(res.text) ));
+      return callback(null, self.init(parse(res.text) ));
     } else {
       var message = "client error";
       if(res.serverError) message = "server error";
       
       var error = new Error(message);
-      error.body = parser(res.text)
+      error.body = parse(res.text)
       error.statusCode = res.status;
       return callback(error);
     }
@@ -2295,7 +2199,7 @@ Resource.prototype.set = function(key, value) {
   var attrs, attr, val;
 
   // Handle both `"key", value` and `{key: value}` -style arguments.
-  if (_.isObject(key) || key == null) {
+  if (_.isObject(key) || key === null) {
     attrs = key;
   } else {
     attrs = {};
@@ -2342,12 +2246,12 @@ Resource.prototype.destroy = function(callback) {
             .set(Resource.auth())
             .on('error', callback);
 
-    if(this.constructor.withCredentials['update']) {
+    if(this.constructor.withCredentials.update) {
       Resource.acceptCookiesFor(r);
     }
 
     r.end(this.constructor.parseResponse(callback));
-  };
+  }
 };
 
 Resource.prototype.update = function(attrs, callback) {
@@ -2357,9 +2261,9 @@ Resource.prototype.update = function(attrs, callback) {
           .set(Resource.auth())
           .on('error', callback);
 
-  if(this.constructor.withCredentials['update']) {
+  if(this.constructor.withCredentials.update) {
     Resource.acceptCookiesFor(r);
-  };
+  }
 
   r.send(attrs).end(this.constructor.parseResponse(callback));
 };
@@ -2408,7 +2312,7 @@ resourceful.define = function (name) {
       });
 
       delete attrs._embedded;
-    };
+    }
 
     if(attrs && attrs._links) {
       self.links = attrs._links;
@@ -2457,7 +2361,7 @@ resourceful.setDescription = function(description) {
       return;
     }
 
-    Factory.links["self"] = {href : description.resources[resourceName].url};
+    Factory.links.self = {href : description.resources[resourceName].url};
     Factory.schema.mediaType = description.schema[Factory.version][singularName].mediaType;
     Factory.schema.description = description.schema[Factory.version][singularName].description;
   });
@@ -2469,7 +2373,7 @@ var resourceful = require("../resourceful");
 
 var Account = exports.Account = resourceful.define("account");
 
-Account.withCredentials["create"] = true;
+Account.withCredentials.create = true;
 
 Account.find = function (params, callback) {
   this._request
