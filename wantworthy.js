@@ -2164,27 +2164,27 @@ Resource.parseResponse = function(callback) {
   var self = this;
 
   return function parser(res) {
-    var parse = function(x) { return x; };
-
-    if(res.header['content-type'] ) {
-      var type = res.header['content-type'];
-      var content = type.split(";")[0].split(/\+|\//);
+    var p = function(x) { return x; };
+    
+    var contentType = res.header['content-type'] || res.xhr.getResponseHeader('Content-Type');
+    if(contentType) {
+      var content = contentType.split(";")[0].split(/\+|\//);
 
       if(content && ~content.indexOf('json')){
-        parse = JSON.parse;
+        p = JSON.parse;
       }
     }
 
     if(res.ok) {
-      if(res.header['content-type'] === 'text/plain') return callback(null, parse(res.text));
+      if(contentType === 'text/plain') return callback(null, p(res.text));
 
-      return callback(null, self.init(parse(res.text) ));
+      return callback(null, self.init(p(res.text) ));
     } else {
       var message = "client error";
       if(res.serverError) message = "server error";
       
       var error = new Error(message);
-      error.body = parse(res.text)
+      error.body = p(res.text)
       error.statusCode = res.status;
       return callback(error);
     }
