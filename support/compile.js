@@ -7,7 +7,7 @@ var args = process.argv.slice(2)
   , pending = args.length
   , files = {};
 
-args.forEach(function(file){
+args.sort().forEach(function(file){
   var mod = file.replace('lib/', '');
   fs.readFile(file, 'utf8', function(err, js){
     if (err) throw err;
