@@ -62,7 +62,7 @@ var Wantworthy = module.exports = function (options) {
 
 Wantworthy.resourceful = require("./wantworthy/resourceful");
 
-Wantworthy.Store = Wantworthy.resourceful.define("store");
+Wantworthy.Store = require('./wantworthy/resources/store').Store;
 Wantworthy.Scraper = Wantworthy.resourceful.define("scraper");
 Wantworthy.Account = require('./wantworthy/resources/account').Account;
 Wantworthy.Session = require('./wantworthy/resources/session').Session;
@@ -2252,7 +2252,9 @@ Resource.parseResponse = function(callback) {
   return function parser(res) {
     var p = function(x) { return x; };
     
-    var contentType = res.header['content-type'] || res.xhr.getResponseHeader('Content-Type');
+    var contentType = res.header['content-type'];
+    if(!contentType && res.xhr) contentType =  res.xhr.getResponseHeader('Content-Type');
+
     if(contentType) {
       var content = contentType.split(";")[0].split(/\+|\//);
 
@@ -2361,7 +2363,7 @@ Resource.prototype.isNew = function() {
 // var Want = require("./lib/wantworthy");
 // var w = new Want({url: "http://api.dev.wantworthy.com:9000"});
 // w.start(console.log);
-// w.login({email : "root@wantworthy.com", password: "wworthy789"}, console.log);
+// w.login({email : "ryan@wantworthy.com", password: "test123"}, console.log);
 // Want.Product.create({name : "foo", url: "http://amazon.com/prod/133"}, console.log);
 
 // Want.Scraper.get("nastygal.com", console.log);
@@ -2603,6 +2605,34 @@ Session.get = function (token, callback) {
   r.end(this.parseResponse(callback));
 };
 }); // module: wantworthy/resources/session.js
+
+requireSync.register("wantworthy/resources/store.js", function(module, exports, require){
+var resourceful = require("../resourceful");
+
+var Store = exports.Store = resourceful.define("store");
+
+Store.stats = function(callback) {
+  this._request
+    .get(this.url() + "/stats")
+    .on('error', callback)
+    .set(this.auth())
+    .end(this.parseResponse(callback));
+};
+
+Store.search = function(options, callback) {
+  if (!callback || typeof callback != "function") {
+    callback = options;
+    options = {};
+  }
+
+  this._request
+    .get(this.url())
+    .send(options)
+    .set(this.auth())
+    .on('error', callback)
+    .end(this.parseResponse(callback));
+};
+}); // module: wantworthy/resources/store.js
 
 
   return requireSync('wantworthy');
