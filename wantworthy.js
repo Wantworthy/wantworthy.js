@@ -63,7 +63,7 @@ var Wantworthy = module.exports = function (options) {
 Wantworthy.resourceful = require("./wantworthy/resourceful");
 
 Wantworthy.Store = require('./wantworthy/resources/store').Store;
-Wantworthy.Scraper = Wantworthy.resourceful.define("scraper");
+Wantworthy.Scraper = require('./wantworthy/resources/scraper').Scraper;
 Wantworthy.Account = require('./wantworthy/resources/account').Account;
 Wantworthy.Session = require('./wantworthy/resources/session').Session;
 Wantworthy.Product = require('./wantworthy/resources/product').Product;
@@ -2569,6 +2569,34 @@ Product.search = function(options, callback) {
     .end(this.parseResponse(callback));
 };
 }); // module: wantworthy/resources/product.js
+
+requireSync.register("wantworthy/resources/scraper.js", function(module, exports, require){
+var resourceful = require("../resourceful");
+
+var Scraper = exports.Scraper = resourceful.define("scraper");
+
+Scraper.stats = function(callback) {
+  this._request
+    .get(this.url() + "/stats")
+    .on('error', callback)
+    .set(this.auth())
+    .end(this.parseResponse(callback));
+};
+
+Scraper.search = function(options, callback) {
+  if (!callback || typeof callback != "function") {
+    callback = options;
+    options = {};
+  }
+
+  this._request
+    .get(this.url())
+    .send(options)
+    .set(this.auth())
+    .on('error', callback)
+    .end(this.parseResponse(callback));
+};
+}); // module: wantworthy/resources/scraper.js
 
 requireSync.register("wantworthy/resources/session.js", function(module, exports, require){
 var resourceful = require("../resourceful");
