@@ -104,6 +104,14 @@ Wantworthy.prototype.register = function(accountParams, callback) {
   });
 };
 
+Wantworthy.prototype.initPasswordReset = function(email, callback) {
+  Wantworthy.Account.initPasswordReset(email, callback);
+};
+
+Wantworthy.prototype.resetPassword = function(resetParams, callback) {
+  Wantworthy.Account.resetPassword(resetParams, callback);
+};
+
 Wantworthy.prototype.login = function(credentials, callback) {
   var self = this;
 
@@ -2469,6 +2477,24 @@ Account.find = function (params, callback) {
     .send(params)
     .set('Accept', this.schema.mediaType)
     .set(this.auth())
+    .on('error', callback)
+    .end(this.parseResponse(callback));
+};
+
+Account.initPasswordReset = function (email, callback) {
+  this._request
+    .post(this.url() + '/pwforgot')
+    .send({ email: email })
+    .set('Accept', this.schema.mediaType)
+    .on('error', callback)
+    .end(this.parseResponse(callback));
+};
+
+Account.resetPassword = function (resetParams, callback) {
+  this._request
+    .post(this.url() + '/pwreset')
+    .send(resetParams)
+    .set('Accept', this.schema.mediaType)
     .on('error', callback)
     .end(this.parseResponse(callback));
 };
