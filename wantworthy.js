@@ -2418,6 +2418,14 @@ resourceful.define = function (name) {
     if(attrs) self.attributes = attrs;
     
     resourceful.Resource.call(this, attrs);
+
+    // explicitly set the construct to the Factory function, required for older versions of safari
+    // card https://trello.com/card/not-working-in-safari-5-0-5/4fc7df8742d5291c3fb1c3f6/80
+    if(Object.getPrototypeOf) {
+      Object.getPrototypeOf(this).constructor = Factory;
+    } else {
+      this.__proto__.constructor = Factory;
+    }
   };
 
   //
@@ -2425,10 +2433,6 @@ resourceful.define = function (name) {
   //
   _.extend(Factory, resourceful.Resource);
   _.extend(Factory.prototype, resourceful.Resource.prototype);
-  
-  // explicitly set the construct to the Factory function, required for older versions of safari
-  // card https://trello.com/card/not-working-in-safari-5-0-5/4fc7df8742d5291c3fb1c3f6/80
-  resourceful.Resource.prototype.constructor = Factory;
 
   // Factory.__proto__ = resourceful.Resource;
   // Factory.prototype.__proto__ = resourceful.Resource.prototype;
