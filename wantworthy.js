@@ -2507,6 +2507,18 @@ Account.resetPassword = function (resetParams, callback) {
     .end(this.parseResponse(callback));
 };
 
+Account.prototype.setProfilePicCrop = function (cropSelection, callback) {
+  var r = this.constructor._request
+    .put(this.url() + '/profilepic')
+    .send(cropSelection)
+    .set(this.auth())
+    .set('Accept', this.constructor.schema.mediaType)
+    .on('error', callback)
+    ;
+  this.constructor.acceptCookiesFor(r);
+  r.end(this.constructor.parseResponse(callback));
+};
+
 Account.prototype.getFullName = function () {
   var first = this.get('first_name') || '';
   var last = this.get('last_name') || '';
@@ -2528,6 +2540,37 @@ Account.prototype.productGroups = function (callback) {
     .on('error', callback)
     .end(this.constructor.parseResponse(callback));
 };
+
+Account.prototype.hasCustomProfilePic = function () {
+  return !!this.get('profile_pic_exists');
+};
+
+Account.prototype.getProfilePic = function (size) {
+  size = size || 'large';
+  return this.links.images.profile[size];
+};
+
+Account.prototype.getProfilePicOriginal = function () {
+  return this.getProfilePic('original');
+};
+
+Account.prototype.getProfilePicLarge = function () {
+  return this.getProfilePic('large');
+};
+
+Account.prototype.getProfilePicSmall = function () {
+  return this.getProfilePic('small');
+};
+
+Account.prototype.getProfilePicOriginalDimensions = function () {
+  return {
+    x1: this.get('profile_pic_crop_x1'),
+    y1: this.get('profile_pic_crop_y1'),
+    x2: this.get('profile_pic_crop_x2'),
+    y2: this.get('profile_pic_crop_y2')
+  }
+};
+
 }); // module: wantworthy/resources/account.js
 
 requireSync.register("wantworthy/resources/group.js", function(module, exports, require){
