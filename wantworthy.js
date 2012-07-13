@@ -2541,25 +2541,37 @@ Account.prototype.productGroups = function (callback) {
     .end(this.constructor.parseResponse(callback));
 };
 
+Account.prototype._profilePicKey;
+Account.prototype.setProfilePicKey = function (newKey) {
+  this._profilePicKey = newKey || Math.random();
+  console.log('setProfilePicKey', this._profilePicKey);
+};
+Account.prototype.getProfilePicKey = function (newKey) {
+  if (!this._profilePicKey) {
+    this.setProfilePicKey();
+  }
+  return this._profilePicKey;
+};
+
 Account.prototype.hasCustomProfilePic = function () {
   return !!this.get('profile_pic_exists');
 };
 
-Account.prototype.getProfilePic = function (size) {
+Account.prototype.getProfilePic = function (size, useKey) {
   size = size || 'large';
-  return this.links.images.profile[size];
+  return this.links.images.profile[size] + (!!useKey ? ('?r=' + this.getProfilePicKey()) : '');
 };
 
-Account.prototype.getProfilePicOriginal = function () {
-  return this.getProfilePic('original');
+Account.prototype.getProfilePicOriginal = function (useKey) {
+  return this.getProfilePic('original', useKey);
 };
 
-Account.prototype.getProfilePicLarge = function () {
-  return this.getProfilePic('large');
+Account.prototype.getProfilePicLarge = function (useKey) {
+  return this.getProfilePic('large', useKey);
 };
 
-Account.prototype.getProfilePicSmall = function () {
-  return this.getProfilePic('small');
+Account.prototype.getProfilePicSmall = function (useKey) {
+  return this.getProfilePic('small', useKey);
 };
 
 Account.prototype.getLastProfilePicCropSelection = function () {
