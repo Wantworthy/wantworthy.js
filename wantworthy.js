@@ -2662,6 +2662,7 @@ Product.search = function(options, callback) {
     options = {};
   }
 
+  //TODO: fix the 'Accept' for product sets
   this._request
     .get(this.url())
     .send(options)
@@ -2669,6 +2670,16 @@ Product.search = function(options, callback) {
     // .set('Accept', this.schema.mediaType)
     .end(this.parseResponse(callback));
 };
+
+Product.find = function (params, callback) {
+  this._request
+    .get(this.url() + '/' + params.id)
+    .send(params)
+    .set('Accept', this.schema.mediaType)
+    .on('error', callback)
+    .end(this.parseResponse(callback));
+};
+
 }); // module: wantworthy/resources/product.js
 
 requireSync.register("wantworthy/resources/scraper.js", function(module, exports, require){
