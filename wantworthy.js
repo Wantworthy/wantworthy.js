@@ -2273,8 +2273,14 @@ Resource.parseResponse = function(callback) {
 
     if(res.ok) {
       if(contentType === 'text/plain') return callback(null, p(res.text));
-
-      return callback(null, self.init(p(res.text) ));
+      var resourceFactory = self;
+      Object.keys(Wantworthy.resourceful.resources).forEach(function (resourceName) {
+        var possibleResource = Wantworthy.resourceful.resources[resourceName];
+        if (contentType === possibleResource.schema.mediaType) {
+          resourceFactory = possibleResource;
+        }
+      });
+      return callback(null, resourceFactory.init(p(res.text) ));
     } else {
       var message = "client error";
       if(res.serverError) message = "server error";
@@ -2366,6 +2372,61 @@ Resource.prototype.update = function(attrs, callback) {
 
 Resource.prototype.isNew = function() {
   return !this.links || !this.links.self;
+};
+
+//Gets the resource information for a given key
+// Returns { url: [url], requiresAuth: [true|false] }
+Resource.prototype.getResourceDetails = function(id, callback) {
+  //Start with 'links' as the current node
+  var currentNode = this.links;
+  //For depth > 1, we need to split keys up with a '.'
+  var keys = id.split('.');
+  //Loop through the keys parts
+  while (keys.length) {
+    //Take the first key part off the list and see if currentNode has that property
+    var key = keys.shift();
+    currentNode = currentNode[key];
+    if (!currentNode) {
+      return callback({ type: 'missing_key', id: id, key: key });
+    }
+  }
+
+  var resourceUrl;
+  var requiresAuth = false;
+  if (currentNode.href) { //If the property has an href, use it
+    resourceUrl = currentNode.href;
+    //Setting the attribute 'requiresAuth' to 'true' cause credentials to be sent with the resource request
+    requiresAuth = currentNode.requiresAuth === 'true';
+  } else if (typeof currentNode === 'string') { //If the property is a string, treat it as the href
+    resourceUrl = currentNode;
+  } else {
+    return callback({ type: 'missing_url', id: id });
+  }
+
+  callback(null, { url: resourceUrl, requiresAuth: requiresAuth });
+};
+
+//Fetches external resources referred to by the "links" property
+Resource.prototype.fetch = function(id, callback) {
+  var self = this;
+
+  self.getResourceDetails(id, function (err, resource) {
+    if (err) {
+      return callback(err);
+    }
+
+    //Build the request
+    var request = self.constructor._request
+      .get(resource.url)
+      .on('error', callback)
+      ;
+
+    if (resource.requiresAuth) {
+      request.set(Resource.auth());
+    }
+
+    request.send().end(self.constructor.parseResponse(callback));
+  });
 };
 
 // var Want = require("./lib/wantworthy");
