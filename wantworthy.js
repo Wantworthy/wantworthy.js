@@ -55,7 +55,8 @@ var API = require("./wantworthy/api").API;
     // Session = require('./wantworthy/resources/session').Session;
 
 var Wantworthy = module.exports = function (options) {
-  options = options || {};
+  this.options = options || {};
+  this.config = options.config;
   this.api = new API(options);
   this.started = false; // flag to know if api service has been discovered
 };
@@ -68,6 +69,7 @@ Wantworthy.Account = require('./wantworthy/resources/account').Account;
 Wantworthy.Session = require('./wantworthy/resources/session').Session;
 Wantworthy.Product = require('./wantworthy/resources/product').Product;
 Wantworthy.Group = require('./wantworthy/resources/group').Group;
+Wantworthy.Comment = require('./wantworthy/resources/comment').Comment;
 
 //
 // ### function start (sessionToken, done)
@@ -142,6 +144,26 @@ Wantworthy.prototype.loadSession = function(token, callback) {
     return callback(null, session);
   });
 };
+
+Wantworthy.prototype.createDummyAccount = function() {
+  return new Wantworthy.Account({
+    id: 0,
+    slug: '',
+    first_name: 'Jane',
+    last_name: 'Doe',
+    roles: [],
+    profile_pic_exists: false,
+    _links: {
+      images: {
+        profile: {
+          large: this.config.awsUrl + '/profile_pic/default_profile_large.jpg',
+          small: this.config.awsUrl + '/profile_pic/default_profile_small.jpg',
+        }
+      }
+    }
+  });
+};
+
 }); // module: wantworthy.js
 
 requireSync.register("wantworthy/api.js", function(module, exports, require){
@@ -2190,10 +2212,46 @@ requireSync.register("wantworthy/browser/underscore.js", function(module, export
 
 requireSync.register("wantworthy/resource.js", function(module, exports, require){
 var Wantworthy = require("../wantworthy"),
+    resourceful = require("./resourceful"),
     _ = require('wantworthy/browser/underscore');
 
 var Resource = exports.Resource = function(attrs) {
   var self = this;
+  self.links = {};
+  self.attributes = {};
+
+  if(attrs && attrs._embedded) {
+    Object.keys(attrs._embedded).forEach(function(resourceName){
+      if(_.isArray(attrs._embedded[resourceName])) {
+        self[resourceName]  =  _.map(attrs._embedded[resourceName], function(r) {
+          if(resourceful.resources[resourceName]) {
+            return new(resourceful.resources[resourceName])(r);
+          } else {
+            return new Resource(r);
+          }
+        });
+      } else {
+        if(resourceful.resources[resourceName]) {
+          self[resourceName] = new(resourceful.resources[resourceName])(attrs._embedded[resourceName]);
+        } else {
+          self[resourceName] = new Resource(attrs._embedded[resourceName]);
+        }
+      }
+    });
+
+    delete attrs._embedded;
+  }
+
+  if(attrs && attrs._links) {
+    self.links = attrs._links;
+    delete attrs._links;
+  }
+  
+  if(attrs) self.attributes = attrs;
+
+  if(this.initialize) {
+    this.initialize.call(this, arguments);
+  }
 };
 
 Resource._request = require('wantworthy/browser/superagent');
@@ -2243,8 +2301,20 @@ Resource.init = function (attrs) {
   return new(this)(attrs);
 };
 
-Resource.url = function() {
-  return this.links.self.href;
+Resource.url = function(rel, tokens) {
+  rel = rel || 'self';
+  tokens = tokens || {};
+
+  var url = this.links[rel].href;
+
+  //If tokens has any keys, try to replace them in the URL
+  if (Object.keys(tokens).length) {
+    url = url.replace(/\:(\w+)\:/g, function (match, token) {
+      return tokens.hasOwnProperty(token) ? tokens[token] : match;
+    });
+  }
+
+  return url;
 };
 
 Resource.withCredentials = {
@@ -2315,8 +2385,20 @@ Resource.prototype.has = function(attr) {
   return this.get(attr) != null;
 },
 
-Resource.prototype.url = function() {
-  return this.links.self.href;
+Resource.prototype.url = function(rel, tokens) {
+  rel = rel || 'self';
+  tokens = tokens || {};
+
+  var url = this.links[rel].href;
+
+  //If tokens has any keys, try to replace them in the URL
+  if (Object.keys(tokens).length) {
+    url = url.replace(/\:(\w+)\:/g, function (match, token) {
+      return tokens.hasOwnProperty(token) ? tokens[token] : match;
+    });
+  }
+
+  return url;
 };
 
 Resource.prototype.auth = function() {
@@ -2433,6 +2515,8 @@ Resource.prototype.fetch = function(id, callback) {
 // var w = new Want({url: "http://api.dev.wantworthy.com:9000"});
 // w.start(console.log);
 // w.login({email : "ryan@wantworthy.com", password: "test123"}, console.log);
+// Want.Product.get("2403920b-3575-40d2-afb3-002225821bdd", function(err, p){product = p;});
+// product.comments(function(err, c){comments = c;});
 // Want.Product.create({name : "foo", url: "http://amazon.com/prod/133"}, console.log);
 
 // Want.Scraper.get("nastygal.com", console.log);
@@ -2452,32 +2536,6 @@ resourceful.define = function (name) {
   var Factory = function Factory (attrs) {
     var self = this;
 
-    self.links = {};
-    self.attributes = {};
-
-    if(attrs && attrs._embedded) {
-      Object.keys(attrs._embedded).forEach(function(resourceName){
-        if(resourceful.resources[resourceName]) {
-          if(_.isArray(attrs._embedded[resourceName])) {
-            self[resourceName]  =  _.map(attrs._embedded[resourceName], function(r){ return new(resourceful.resources[resourceName])(r)});
-          } else {
-            self[resourceName] = new(resourceful.resources[resourceName])(attrs._embedded[resourceName]);
-          }
-        } else {
-          self[resourceName] = attrs._embedded[resourceName];
-        }
-      });
-
-      delete attrs._embedded;
-    }
-
-    if(attrs && attrs._links) {
-      self.links = attrs._links;
-      delete attrs._links;
-    }
-    
-    if(attrs) self.attributes = attrs;
-    
     resourceful.Resource.call(this, attrs);
 
     // explicitly set the construct to the Factory function, required for older versions of safari
@@ -2658,6 +2716,56 @@ Account.prototype.getLastProfilePicCropSelection = function () {
 
 }); // module: wantworthy/resources/account.js
 
+requireSync.register("wantworthy/resources/comment.js", function(module, exports, require){
+var resourceful = require("../resourceful");
+var Resource = require("../resource").Resource;
+
+var Comment = exports.Comment = resourceful.define("comment");
+
+Comment.createForProduct = function (attrs, callback) {
+  var r = this._request
+    .post(this.url(null, { productID: attrs.productID }))
+    .set('Accept', this.schema.mediaType)
+    .set(this.auth())
+    .on('error', callback);
+
+  if(this.withCredentials.create){
+    Resource.acceptCookiesFor(r);
+  }
+
+  r.send(attrs).end(this.parseResponse(callback));
+};
+
+Comment.getForProduct = function (productID, callback) {
+  var r = this._request
+    .get(this.url(null, { productID: productID }))
+    // .set('Accept', this.schema.mediaType)
+    .set(this.auth())
+    .on('error', callback);
+
+  if(this.withCredentials.create){
+    Resource.acceptCookiesFor(r);
+  }
+
+  r.send().end(this.parseResponse(callback));
+};
+
+//This is because resourceful is using underscore's extend() rather than
+//  leveraging the prototype chain
+Comment._origParseResponse = Comment.parseResponse;
+Comment.parseResponse  = function (callback) {
+  return this._origParseResponse.call(this, function (err, comments) {
+    if (err) {
+      return callback(err);
+    }
+    comments.comments = comments.comment;
+    delete comments.comment;
+    callback(null, comments);
+  });
+};
+
+}); // module: wantworthy/resources/comment.js
+
 requireSync.register("wantworthy/resources/group.js", function(module, exports, require){
 var resourceful = require("../resourceful"),
     _ = require('wantworthy/browser/underscore');
@@ -2730,6 +2838,20 @@ Product.search = function(options, callback) {
     .on('error', callback)
     // .set('Accept', this.schema.mediaType)
     .end(this.parseResponse(callback));
+};
+
+Product.prototype.comments = function(options, callback) {
+  if (!callback || typeof callback != "function") {
+    callback = options;
+    options = {};
+  }
+
+  this.constructor._request
+    .get(this.url("comments"))
+    .send(options)
+    .set(this.auth())
+    .on('error', callback)
+    .end(this.constructor.parseResponse(callback));
 };
 
 }); // module: wantworthy/resources/product.js
