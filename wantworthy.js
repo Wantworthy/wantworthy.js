@@ -2608,6 +2608,10 @@ Account.find = function (params, callback) {
     .end(this.parseResponse(callback));
 };
 
+Account.getEmpty = function (callback) {
+  return this.get('empty', callback);
+};
+
 Account.initPasswordReset = function (email, callback) {
   this._request
     .post(this.url() + '/pwforgot')
