@@ -56,7 +56,6 @@ var API = require("./wantworthy/api").API;
 
 var Wantworthy = module.exports = function (options) {
   this.options = options || {};
-  this.config = options.config;
   this.api = new API(options);
   this.started = false; // flag to know if api service has been discovered
 };
@@ -142,25 +141,6 @@ Wantworthy.prototype.loadSession = function(token, callback) {
     Wantworthy.auth = self.session;
 
     return callback(null, session);
-  });
-};
-
-Wantworthy.prototype.createDummyAccount = function() {
-  return new Wantworthy.Account({
-    id: 0,
-    slug: '',
-    first_name: 'Jane',
-    last_name: 'Doe',
-    roles: [],
-    profile_pic_exists: false,
-    _links: {
-      images: {
-        profile: {
-          large: this.config.awsUrl + '/profile_pic/default_profile_large.jpg',
-          small: this.config.awsUrl + '/profile_pic/default_profile_small.jpg',
-        }
-      }
-    }
   });
 };
 
