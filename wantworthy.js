@@ -2686,7 +2686,8 @@ Account.prototype.hasCustomProfilePic = function () {
 
 Account.prototype.getProfilePic = function (size, useKey) {
   size = size || 'large';
-  return this.links.images.profile[size] + (!!useKey ? ('?x=' + this.getProfilePicKey()) : '');
+  var separator = (this.links.images.profile[size].indexOf('?') < 0) ? '?' : '&';
+  return this.links.images.profile[size] + (!!useKey ? (separator + 'x=' + this.getProfilePicKey()) : '');
 };
 
 Account.prototype.getProfilePicOriginal = function (useKey) {
