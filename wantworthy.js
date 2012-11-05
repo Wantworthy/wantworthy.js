@@ -2712,6 +2712,10 @@ Account.prototype.getLastProfilePicCropSelection = function () {
   }
 };
 
+Account.prototype.updateFriendActivityLastViewed = function (callback) {
+    this.update({ friend_activity_last_viewed: new Date() }, callback);
+};
+
 }); // module: wantworthy/resources/account.js
 
 requireSync.register("wantworthy/resources/comment.js", function(module, exports, require){
