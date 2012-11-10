@@ -2856,6 +2856,15 @@ Product.prototype.comments = function(options, callback) {
     .end(this.constructor.parseResponse(callback));
 };
 
+Product.activity = function(options, callback) {
+  this._request
+    .post(this.url() + '/activity')
+    .send(options)
+    .on('error', callback)
+    // .set('Accept', this.schema.mediaType)
+    .end(this.parseResponse(callback));
+};
+
 }); // module: wantworthy/resources/product.js
 
 requireSync.register("wantworthy/resources/scraper.js", function(module, exports, require){
