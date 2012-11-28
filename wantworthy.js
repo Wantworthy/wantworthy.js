@@ -2195,7 +2195,7 @@ var Wantworthy = require("../wantworthy"),
     resourceful = require("./resourceful"),
     _ = require('wantworthy/browser/underscore');
 
-var Resource = exports.Resource = function(attrs) {
+var Resource = exports.Resource = function(attrs, links) {
   var self = this;
   self.links = {};
   self.attributes = {};
@@ -2222,8 +2222,8 @@ var Resource = exports.Resource = function(attrs) {
     delete attrs._embedded;
   }
 
-  if(attrs && (attrs._links || attrs.links)) {
-    self.links = attrs._links || attrs.links;
+  if(attrs && (attrs._links || attrs.links || links)) {
+    self.links = attrs._links || attrs.links || links;
     delete attrs._links;
     delete attrs.links;
   }
@@ -2527,10 +2527,10 @@ resourceful.Resource   = require('./resource').Resource;
 
 resourceful.define = function (name) {
 
-  var Factory = function Factory (attrs) {
+  var Factory = function Factory (attrs, links) {
     var self = this;
 
-    resourceful.Resource.call(this, attrs);
+    resourceful.Resource.call(this, attrs, links);
 
     // explicitly set the construct to the Factory function, required for older versions of safari
     // card https://trello.com/card/not-working-in-safari-5-0-5/4fc7df8742d5291c3fb1c3f6/80
