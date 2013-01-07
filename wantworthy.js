@@ -2857,9 +2857,9 @@ Product.prototype.comments = function(options, callback) {
     .end(this.constructor.parseResponse(callback));
 };
 
-Product.activity = function(options, callback) {
+Product.totals = function(options, callback) {
   this._request
-    .post(this.url() + '/activity')
+    .post(this.url() + '/totals')
     .send(options)
     .on('error', callback)
     // .set('Accept', this.schema.mediaType)
