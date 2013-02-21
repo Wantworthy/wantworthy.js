@@ -2624,6 +2624,20 @@ Account.resetPassword = function (resetParams, callback) {
     .end(this.parseResponse(callback));
 };
 
+//TODO: monitor this behavior and move it to Resource if things look good
+Account.prototype._update = Account.prototype.update;
+Account.prototype.update = function (attrs, callback) {
+  var self = this;
+  self._update(attrs, function (error, result) {
+    if (!error) {
+      Object.keys(attrs).forEach(function (key) {
+        self.set(key, attrs[key]);
+      });
+    }
+    return callback(error, result);
+  });
+};
+
 Account.prototype.setProfilePicCrop = function (cropSelection, callback) {
   var r = this.constructor._request
     .put(this.url() + '/profilepic')
