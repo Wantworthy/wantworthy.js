@@ -2227,7 +2227,7 @@ var Resource = exports.Resource = function(attrs, links) {
     delete attrs._links;
     delete attrs.links;
   }
-  
+
   if(attrs) self.attributes = attrs;
 
   if(this.initialize) {
@@ -2250,7 +2250,7 @@ Resource.get = function (id, callback) {
   if(this.withCredentials.get) {
     Resource.acceptCookiesFor(r);
   }
-  
+
   r.end(this.parseResponse(callback));
 };
 
@@ -2323,7 +2323,7 @@ Resource.parseResponse = function(callback) {
 
   return function parser(res) {
     var p = function(x) { return x; };
-    
+
     var contentType = res.header['content-type'];
     if(!contentType && res.xhr) contentType =  res.xhr.getResponseHeader('Content-Type');
 
@@ -2348,9 +2348,13 @@ Resource.parseResponse = function(callback) {
     } else {
       var message = "client error";
       if(res.serverError) message = "server error";
-      
+
       var error = new Error(message);
-      error.body = p(res.text)
+      try {
+        error.body = p(res.text)
+      } catch(err) {
+        err.body = res.text;
+      }
       error.statusCode = res.status;
       return callback(error);
     }
@@ -2515,6 +2519,7 @@ Resource.prototype.fetch = function(id, callback) {
 
 // Want.Scraper.get("nastygal.com", console.log);
 // Want.Account.find({slug : "root-root"}, console.log);
+
 }); // module: wantworthy/resource.js
 
 requireSync.register("wantworthy/resourceful.js", function(module, exports, require){
@@ -2852,6 +2857,7 @@ Product.search = function(options, callback) {
   this._request
     .get(this.url())
     .send(options)
+    .set(this.auth())
     .on('error', callback)
     // .set('Accept', this.schema.mediaType)
     .end(this.parseResponse(callback));
