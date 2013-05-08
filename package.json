@@ -1,7 +1,7 @@
 {
   "name": "wantworthy.js",
   "description": "Javascript client for working with the wantworthy.com api. Runs in node and the browser",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "author": "Ryan Fitzgerald <ryan@codebrewstudios.com>",
   "repository": {
     "type": "git",
